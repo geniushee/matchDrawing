@@ -1,0 +1,56 @@
+spring:
+  profiles:
+    active: dev, websocket
+    include: secret
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:./test_db;MODE=MYSQL;
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        default_batch_fetch_size: 100
+        use_sql_comments: true
+    open-in-view: false
+  threads:
+    virtual:
+      enabled: true
+#  kafka:
+#    bootstrap-servers: localhost:19092
+#    producer:
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#    consumer:
+#      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+#  rabbitmq:
+#    host: "${custom.rabbitmq.host}"
+#    port: "${custom.rabbitmq.port}"
+#    stompPort: "${custom.rabbitmq.stompPort}"
+#    username: "${custom.rabbitmq.username}"
+#    password: "${custom.rabbitmq.password}"
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.surl.first : debug
+    org.hibernate.sql : debug
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
+#    org.springframework.kafka : debug
+
+#custom:
+#  site:
+#    dev:
+#      domain: localhost
+#      frontUrl: "http://${custom.site.dev.domain}:5173"
+#      backUrl: "http://${custom.site.dev.domain}:${server.port}"
+#  jwt:
+#    secretKey: ${custom.jwt.key}

@@ -1,0 +1,86 @@
+<html layout:decorate="~{global/layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>
+        const roomId = [[${roomDto.id}]];
+        let curParticipants = [[${roomDto.numOfCurParticipants}]]
+
+        const socket = new SockJS('http://localhost:8080/ws?roomId='+`${roomId}`);
+        const stompClient = Stomp.over(socket);
+        
+
+        stompClient.connect({}, function (frame) {
+            console.log("Connected: " + frame)
+            stompClient.subscribe(`/topic/room${roomId}`, function (data) {
+                let jsonData = JSON.parse(data.body)
+                let msgBox = document.getElementById('msgBox');
+                let msgBit = document.createElement("div");
+                msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
+                msgBox.appendChild(msgBit);
+
+                if(jsonData.sender === "system" && jsonData.msg.includes("참가")){
+                    plusMember();
+                }
+
+                if(jsonData.sender === "system" && jsonData.msg.includes("퇴장")){
+                    minusMember();
+                }
+            })
+        });
+
+        
+
+        window.addEventListener('beforeunload', function(event){
+            stompClient.disconnect(() => {
+                console.log("disconnect ws")
+            });
+        })
+
+        function plusMember(){
+            curParticipants = curParticipants + 1;
+            document.getElementById('curParticipants').innerText = curParticipants;
+        }
+
+        function minusMember(){
+            curParticipants = curParticipants - 1;
+            document.getElementById('curParticipants').innerText = curParticipants;
+        }
+    </script>
+</head>
+
+<body layout:fragment="content">
+    <article>
+        <div>방이름 : <span th:text="${roomDto.roomName}"></span></div>
+        <div>인원 수(현재/최대) : <span id="curParticipants"></span>/<span th:text="${roomDto.numOfParticipants}"></span></div>
+    </article>
+    <hr>
+    <section id="msgBox">
+        <div>
+            채팅창
+        </div>
+        <hr>
+    </section>
+    <hr>
+    <form th:action method="POST">
+        <input id="send" name="send" type="text"> <button type="submit" onclick="postMsg(event);">보내기</button>
+    </form>
+
+    <script>
+        plusMember();
+
+
+
+        function postMsg(event) {
+            event.preventDefault();
+            let sendMsg = document.getElementById('send');
+            let msg = sendMsg.value.trim();
+            stompClient.send(`/app/room${roomId}`,{},JSON.stringify({msg:msg}))
+            console.log(msg);
+            sendMsg.value = "";
+        }
+    </script>
+</body>
+
+</html>

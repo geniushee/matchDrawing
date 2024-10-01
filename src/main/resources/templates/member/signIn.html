@@ -1,0 +1,23 @@
+<html></html>
+<body>
+    <section>
+        <span>로그인 페이지</span>
+    </section>
+    <form th:action method="post">
+        <label for="memberName">아이디</label>
+        <input type="text" id="memberName" name="name" placeholder="아이디를 입력해주세요.">
+        <label for="memberPsw">비밀번호</label>
+        <input type="password" id="memberPsw" name="password" placeholder="비밀번호를 입력해주세요.">
+        <div>
+            <button type="submit">로그인</button>
+            <button type="button" onclick="goBack(); return false;">뒤로가기</button>
+        </div>
+    </form>
+
+    <script>
+        function goBack(){
+            window.history.goBack();
+        }
+    </script>
+</body>
+</html>

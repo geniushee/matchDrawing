@@ -1,0 +1,31 @@
+<html layout:decorate="~{global/layout}">
+<main layout:fragment="content">
+    <section>
+        <article>
+            방 리스트
+            <div>
+                <a th:href="@{/roby/create}">방만들기</a>
+            </div>
+        </article>
+    </section>
+    <section>
+        <ul>
+            <li th:each="item : ${roomList.content}">
+                <div>
+                    <div>
+                        <span>방이름 : </span><span th:text="${item.roomName}"></span>
+                    </div>
+                    <hr>
+                    <div>
+                        <span>현재 참여자 : </span><span th:text="${item.numOfCurParticipants}"></span>
+                        <span>    </span>
+                        <span>최대 참여자 : </span><span th:text="${item.numOfParticipants}"></span>
+                    </div>
+                </div>
+                <a th:href="@{/roby/room/{id}(id=${item.id})}">참여하기</a>
+            </li>
+        </ul>
+    </section>
+</main>
+
+</html>
