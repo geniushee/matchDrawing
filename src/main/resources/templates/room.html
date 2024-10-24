@@ -66,6 +66,9 @@
     <form th:action method="POST">
         <input id="send" name="send" type="text"> <button type="submit" onclick="postMsg(event);">보내기</button>
     </form>
+    <section>
+        <button>게임시작</button><span>    </span><button onclick="goBack()">나가기</button>
+    </section>
 
     <script>
         plusMember();
@@ -79,6 +82,11 @@
             stompClient.send(`/app/room${roomId}`,{},JSON.stringify({msg:msg}))
             console.log(msg);
             sendMsg.value = "";
+        }
+
+        function goBack(){
+            event.preventDefault();
+            window.history.back();
         }
     </script>
 </body>

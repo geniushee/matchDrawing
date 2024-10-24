@@ -5,6 +5,7 @@ import com.example.matchdrawing.domain.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.service.DrawingService;
 import com.example.matchdrawing.global.Rq;
 import com.example.matchdrawing.global.config.websocket.CustomPrincipal;
+import com.example.matchdrawing.global.dto.DrawingDataMessageDto;
 import com.example.matchdrawing.global.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -71,6 +72,10 @@ public class DrawingController {
     @GetMapping("/room/{roomId}")
     public String enterRoom(@PathVariable(name="roomId")Long roomId,
                             Model model){
+        if(!rq.isLogin()){
+            return  "redirect:/roby";
+        }
+
         DrawingRoomDto roomDto = drawingService.findById(roomId);
         String destination = "/room" + roomId;
         SimpleMessageDto msgDto = new SimpleMessageDto();
@@ -87,6 +92,20 @@ public class DrawingController {
                             CustomPrincipal user){
         msgDto.setSender(user.getName());
         String destination = "/room" + id;
+        drawingService.sendMessage(destination, msgDto);
+    }
+
+    @GetMapping("/test")
+    public String showTestPage(){
+        return "canvas";
+    }
+
+    @MessageMapping("/drawing{id}")
+    public void drawingSendImg(@DestinationVariable(value = "id")Long id,
+                               DrawingDataMessageDto msgDto,
+                               CustomPrincipal user){
+        msgDto.setSender("시험");
+        String destination = "/drawing1";
         drawingService.sendMessage(destination, msgDto);
     }
 }

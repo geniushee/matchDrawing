@@ -25,6 +25,9 @@ public class SimpleWebsocketConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(websocketHandshakeInterceptor)
                 .setHandshakeHandler(customHandshakeHandler)
                 .withSockJS();
+
+        registry.addEndpoint("/dr")
+                .withSockJS();
     }
 
     @Override

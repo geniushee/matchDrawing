@@ -65,8 +65,8 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
         System.out.println("대기실 접속 처리");
         // 대기실 접속 처리
         String query = request.getURI().getQuery();
-//        System.out.println("쿼리 확인");쿼리 확인
-//        System.out.println(query);roomId=3
+        System.out.println("쿼리 확인"); //쿼리 확인
+        System.out.println(query); //roomId=3
 
         String[] querys = query.split("&");
         Map<String, String> params = Arrays.stream(querys).map(q -> q.split("="))

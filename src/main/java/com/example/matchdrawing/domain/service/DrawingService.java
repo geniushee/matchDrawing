@@ -5,7 +5,7 @@ import com.example.matchdrawing.domain.entity.DrawingRoom;
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.repository.DrawingRoomRepository;
 import com.example.matchdrawing.global.config.StompTemplate;
-import com.example.matchdrawing.global.dto.SimpleMessageDto;
+import com.example.matchdrawing.global.dto.MessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -43,7 +43,7 @@ public class DrawingService {
     }
 
 
-    public void sendMessage(String destination, SimpleMessageDto msgDto) {
+    public void sendMessage(String destination, MessageDto msgDto) {
         template.convertAndSend(destination, msgDto);
     }
 
