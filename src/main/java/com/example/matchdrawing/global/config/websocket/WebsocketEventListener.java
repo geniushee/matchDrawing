@@ -1,7 +1,7 @@
 package com.example.matchdrawing.global.config.websocket;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
-import com.example.matchdrawing.domain.service.DrawingService;
+import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.global.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -19,6 +19,7 @@ public class WebsocketEventListener {
     public void handleWebsocketDisconnectListener(SessionDisconnectEvent event) {
         System.out.println("이벤트 리스너 작동 확인");
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        System.out.println("도착지 확인 : " + headerAccessor);
 
         Member member = (Member) headerAccessor.getSessionAttributes().get("user");
         System.out.printf("""

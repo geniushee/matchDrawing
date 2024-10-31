@@ -1,4 +1,4 @@
-package com.example.matchdrawing.domain.entity;
+package com.example.matchdrawing.domain.game.game.entity;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.global.entity.TimeEntity;

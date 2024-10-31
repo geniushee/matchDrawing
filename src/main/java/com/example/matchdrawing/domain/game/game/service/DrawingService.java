@@ -1,11 +1,12 @@
-package com.example.matchdrawing.domain.service;
+package com.example.matchdrawing.domain.game.game.service;
 
-import com.example.matchdrawing.domain.dto.DrawingRoomDto;
-import com.example.matchdrawing.domain.entity.DrawingRoom;
+import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
+import com.example.matchdrawing.domain.game.game.entity.DrawingRoom;
+import com.example.matchdrawing.domain.game.game.repository.DrawingRoomRepository;
 import com.example.matchdrawing.domain.member.member.entity.Member;
-import com.example.matchdrawing.domain.repository.DrawingRoomRepository;
 import com.example.matchdrawing.global.config.StompTemplate;
 import com.example.matchdrawing.global.dto.MessageDto;
+import com.example.matchdrawing.global.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -47,6 +48,15 @@ public class DrawingService {
         template.convertAndSend(destination, msgDto);
     }
 
+
+    public boolean checkEventStartGame(SimpleMessageDto msgDto) {
+        if(msgDto.getMsg().contains("Event:/")){
+            String msg = msgDto.getMsg().replace("Event:/","");
+            return msg.equals("startGame");
+        }
+        return false;
+    }
+
     public DrawingRoomDto findById(Long roomId) {
         DrawingRoom room = drawingRoomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("잘못된 방입니다."));
         return new DrawingRoomDto(room);
@@ -84,4 +94,5 @@ public class DrawingService {
             drawingRoomRepository.delete(room);
         }
     }
+
 }

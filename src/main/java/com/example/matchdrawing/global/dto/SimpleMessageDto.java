@@ -3,7 +3,6 @@ package com.example.matchdrawing.global.dto;
 import lombok.Data;
 
 @Data
-public class SimpleMessageDto implements MessageDto{
+public class SimpleMessageDto extends MessageDto {
     private String sender;
-    private String msg;
 }

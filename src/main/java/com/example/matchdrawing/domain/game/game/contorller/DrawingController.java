@@ -1,8 +1,8 @@
-package com.example.matchdrawing.domain.contorller;
+package com.example.matchdrawing.domain.game.game.contorller;
 
-import com.example.matchdrawing.domain.dto.CreateRoomDto;
-import com.example.matchdrawing.domain.dto.DrawingRoomDto;
-import com.example.matchdrawing.domain.service.DrawingService;
+import com.example.matchdrawing.domain.game.game.dto.CreateRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
+import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.global.Rq;
 import com.example.matchdrawing.global.config.websocket.CustomPrincipal;
 import com.example.matchdrawing.global.dto.DrawingDataMessageDto;
@@ -46,7 +46,7 @@ public class DrawingController {
         Page<DrawingRoomDto> list = drawingService.getRoomList(pageable);
         model.addAttribute("roomList", list);
 
-        return "list";
+        return "roomList";
 
     }
 
@@ -73,7 +73,7 @@ public class DrawingController {
     public String enterRoom(@PathVariable(name="roomId")Long roomId,
                             Model model){
         if(!rq.isLogin()){
-            return  "redirect:/roby";
+            return  "redirect:/member/signin";
         }
 
         DrawingRoomDto roomDto = drawingService.findById(roomId);
@@ -90,7 +90,12 @@ public class DrawingController {
     public void roomSendMsg(@DestinationVariable(value = "id")Long id,
                             SimpleMessageDto msgDto,
                             CustomPrincipal user){
-        msgDto.setSender(user.getName());
+        if(drawingService.checkEventStartGame(msgDto)){
+            msgDto.setMsg("http://localhost:8080/roby/game/"+id);
+            msgDto.setSender("system");
+        }else{
+            msgDto.setSender(user.getName());
+        }
         String destination = "/room" + id;
         drawingService.sendMessage(destination, msgDto);
     }
@@ -105,7 +110,14 @@ public class DrawingController {
                                DrawingDataMessageDto msgDto,
                                CustomPrincipal user){
         msgDto.setSender("시험");
-        String destination = "/drawing1";
+        String destination = "/drawing"+id;
         drawingService.sendMessage(destination, msgDto);
+    }
+
+    @GetMapping("/game/{id}")
+    public String startGame(@PathVariable(name = "id")Long roomId,
+                          Model model){
+        model.addAttribute("roomId", roomId);
+        return "gameRoom";
     }
 }

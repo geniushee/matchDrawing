@@ -1,4 +1,8 @@
 package com.example.matchdrawing.global.dto;
 
-public interface MessageDto {
+import lombok.Data;
+
+@Data
+public abstract class MessageDto {
+    protected String msg;
 }

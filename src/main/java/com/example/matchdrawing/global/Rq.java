@@ -30,10 +30,12 @@ public class Rq {
             return username;
         }
 
-        Optional<Cookie> loginCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equals("login")).findFirst();
-        if(loginCookie.isPresent()){
-            username = loginCookie.get().getValue();
-            return username;
+        if(request.getCookies() != null) {
+            Optional<Cookie> loginCookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equals("login")).findFirst();
+            if (loginCookie.isPresent()) {
+                username = loginCookie.get().getValue();
+                return username;
+            }
         }
 
         return null;

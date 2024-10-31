@@ -1,7 +1,8 @@
-package com.example.matchdrawing.domain.dto;
+package com.example.matchdrawing.domain.game.game.dto;
 
-import com.example.matchdrawing.domain.entity.DrawingRoom;
+import com.example.matchdrawing.domain.game.game.entity.DrawingRoom;
 import com.example.matchdrawing.domain.member.member.dto.MemberDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.util.List;
 
 
 @Data
+@AllArgsConstructor
 public class DrawingRoomDto {
     private Long id;
     private LocalDateTime createTime;

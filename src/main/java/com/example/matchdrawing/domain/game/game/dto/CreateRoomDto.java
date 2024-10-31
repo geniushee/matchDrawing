@@ -1,4 +1,4 @@
-package com.example.matchdrawing.domain.dto;
+package com.example.matchdrawing.domain.game.game.dto;
 
 import lombok.Data;
 

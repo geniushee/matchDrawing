@@ -39,3 +39,4 @@ out/
 ### etc ###
 test_db.mv.db
 node_modules/
+ticket.py

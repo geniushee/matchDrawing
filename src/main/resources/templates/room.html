@@ -4,46 +4,51 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script>
-        const roomId = [[${roomDto.id}]];
-        let curParticipants = [[${roomDto.numOfCurParticipants}]]
+        const roomId = [[${ roomDto.id }]];
+        let curParticipants = [[${ roomDto.numOfCurParticipants }]]
 
-        const socket = new SockJS('http://localhost:8080/ws?roomId='+`${roomId}`);
+        const socket = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
         const stompClient = Stomp.over(socket);
-        
+
 
         stompClient.connect({}, function (frame) {
             console.log("Connected: " + frame)
             stompClient.subscribe(`/topic/room${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
+
+                if (jsonData.sender === "system" && jsonData.msg.includes("참가")) {
+                    plusMember();
+                }
+
+                if (jsonData.sender === "system" && jsonData.msg.includes("퇴장")) {
+                    minusMember();
+                }
+                if (jsonData.sender === "system" && jsonData.msg.includes("http://")) {
+                    var newUrl = jsonData.msg;
+                    window.location.href = newUrl;
+                }
+                
                 let msgBox = document.getElementById('msgBox');
                 let msgBit = document.createElement("div");
                 msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
                 msgBox.appendChild(msgBit);
-
-                if(jsonData.sender === "system" && jsonData.msg.includes("참가")){
-                    plusMember();
-                }
-
-                if(jsonData.sender === "system" && jsonData.msg.includes("퇴장")){
-                    minusMember();
-                }
             })
         });
 
-        
 
-        window.addEventListener('beforeunload', function(event){
+
+        window.addEventListener('beforeunload', function (event) {
             stompClient.disconnect(() => {
                 console.log("disconnect ws")
             });
         })
 
-        function plusMember(){
+        function plusMember() {
             curParticipants = curParticipants + 1;
             document.getElementById('curParticipants').innerText = curParticipants;
         }
 
-        function minusMember(){
+        function minusMember() {
             curParticipants = curParticipants - 1;
             document.getElementById('curParticipants').innerText = curParticipants;
         }
@@ -67,24 +72,38 @@
         <input id="send" name="send" type="text"> <button type="submit" onclick="postMsg(event);">보내기</button>
     </form>
     <section>
-        <button>게임시작</button><span>    </span><button onclick="goBack()">나가기</button>
+        <button onclick="startGame()">게임시작</button><span> </span><button onclick="goBack()">나가기</button>
     </section>
 
     <script>
         plusMember();
 
+        function startGame() {
+            startCountDown(5);
+        }
 
+        function startCountDown(seconds) {
+            var interval = setInterval(function () {
+                if (seconds > 0) {
+                    stompClient.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: `${seconds} 후 게임이 시작합니다.` }))
+                    seconds--;
+                } else {
+                    clearInterval(interval)
+                    stompClient.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: "Event:/startGame" }))
+                }
+            }, 1000);
+        }
 
         function postMsg(event) {
             event.preventDefault();
             let sendMsg = document.getElementById('send');
             let msg = sendMsg.value.trim();
-            stompClient.send(`/app/room${roomId}`,{},JSON.stringify({msg:msg}))
+            stompClient.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: msg }))
             console.log(msg);
             sendMsg.value = "";
         }
 
-        function goBack(){
+        function goBack() {
             event.preventDefault();
             window.history.back();
         }

@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ko" layout:decorate="~{global/layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>GameRoom</title>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@6.4.3/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
-
-<body>
+<body layout:fragment="content">
     <main style="display: flex;">
+        <!-- 그리는 사람 제외 비활성화 필요 -->
         <section style="border : 1px solid; padding: 5px; max-width: 20%">
             <div style="margin-left: 5px; margin-bottom: 10px;">
                 <button id="pencil">pencil</button>
@@ -30,27 +32,33 @@
                 </p>
             </section>
         </section>
+        <!--캔버스-->
         <canvas id="canvas" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
-    </main>
-    <article>
-        <canvas id="receive" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
-    </article>
+    </main>    
 
-
-    <script src="https://cdn.jsdelivr.net/npm/fabric@6.4.3/dist/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script>
+        const roomId = [[${roomId}]]
         const socket = new SockJS('http://localhost:8080/dr');
         const stompClient = Stomp.over(socket);
         
 
         stompClient.connect({}, function (frame) {
             console.log("Connected: " + frame)
-            stompClient.subscribe(`/topic/drawing1`, function (data) {
+            stompClient.subscribe(`/topic/drawing${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
+                canvas.loadFromJSON(jsonData.msg)
                 console.log(`${jsonData.sender} : ${jsonData.msg}`)
-                
+            })
+        });
+
+        stompClient.connect({}, function (frame) {
+            console.log("Connected: " + frame)
+            stompClient.subscribe(`/topic/room${roomId}`, function (data) {
+                let jsonData = JSON.parse(data.body)
+                let msgBox = document.getElementById('msgBox');
+                let msgBit = document.createElement("div");
+                msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
+                msgBox.appendChild(msgBit);
             })
         });
 
@@ -69,8 +77,6 @@
                 isDrawingMode: true
             });
 
-            const canvas2 = new fabric.Canvas('receive');
-
             if (!canvas.freeDrawingBrush) {
                 canvas.freeDrawingBrush = new fabric['PencilBrush'](canvas);
                 canvas.freeDrawingBrush.color = pencilColor.value;
@@ -83,22 +89,20 @@
                 var jsonData = JSON.stringify(canvas);
                 console.log("JSON : " + jsonData)
 
-
-
-
-                // 그리기
-                canvas2.loadFromJSON(jsonData)
-                stompClient.send(`/app/drawing1`,{},JSON.stringify({msg:jsonData}))
+                // 그리기 공유
+                stompClient.send(`/app/drawing${roomId}`,{},JSON.stringify({msg:jsonData}))
             })
 
             // 새로운 캔버스에 옮겨지면 재렌더링
-            canvas2.on('object:added', function () {
-                var objs = canvas2.getObjects();
-                for(var i = 0, len = objs.length; i < len; i++){
-                    objs[i].selectable = false;
-                }
-                canvas2.renderAll();
+            canvas.on('object:added', function () {
+                // 그리는 사람 제외 비활성화 필요
+                // var objs = canvas.getObjects();
+                // for(var i = 0, len = objs.length; i < len; i++){
+                //     objs[i].selectable = false;
+                // }
+                canvas.renderAll();
             })
+
 
             pencilColor.onchange = function () {
                 canvas.freeDrawingBrush.color = this.value;
@@ -128,15 +132,12 @@
             clear.onclick = function () {
                 canvas.clear();
                 
-                //임시
-                console.log("클리어")
-                canvas2.clear();
+                // 그리기 공유
+                stompClient.send(`/app/drawing${roomId}`,{},JSON.stringify({msg:"method:clear"}))
             }
 
         })();
 
     </script>
-
 </body>
-
 </html>

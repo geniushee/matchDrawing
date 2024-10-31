@@ -2,7 +2,7 @@ package com.example.matchdrawing.global.config.websocket;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
-import com.example.matchdrawing.domain.service.DrawingService;
+import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,9 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
         System.out.println("사용자 정보 처리");
         Member member = null;
 
+        /* todo 소켓을 연결할때, 연결정보를 포함해야함. msg와 canvas를 별도로 연결하는데 disconnect에 대한 EventListener는 둘다 작동하므로 어떤 소켓의 연결이 끊겼는지에 대한 정보가 필요함.
+         ws에 대한 정보 - [payload={"msg":"hi","sender":"시험"}, headers={simpMessageType=MESSAGE, stompCommand=SEND, nativeHeaders={destination=[/app/drawing1]}, simpSessionId=11e8e564-0ec9-2dfb-3107-7ab9c9db437d, simpDestination=/app/drawing1}]
+         */
         // 사용자 정보 처리
         List<String> cookieheader = request.getHeaders().get("Cookie");
         String[] cookieString = new String[0];

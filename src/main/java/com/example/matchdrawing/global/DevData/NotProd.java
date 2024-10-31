@@ -1,10 +1,10 @@
 package com.example.matchdrawing.global.DevData;
 
 
-import com.example.matchdrawing.domain.dto.DrawingRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
-import com.example.matchdrawing.domain.service.DrawingService;
+import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
