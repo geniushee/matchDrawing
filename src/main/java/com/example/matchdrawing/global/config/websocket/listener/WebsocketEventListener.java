@@ -1,7 +1,7 @@
 package com.example.matchdrawing.global.config.websocket.listener;
 
-import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
+import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.global.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -32,15 +32,25 @@ public class WebsocketEventListener {
 
             Long id = Long.valueOf((String) headerAccessor.getSessionAttributes().get("roomId"));
 
-            //퇴장 메세지
-            String destination = "/room" + id;
-            SimpleMessageDto msgDto = new SimpleMessageDto();
-            msgDto.setSender("system");
-            msgDto.setMsg(String.format("%s가 퇴장했습니다.", member.getUsername()));
-            drawingService.sendMessage(destination, msgDto);
+            if(drawingService.isOwner(id, member)){
+                //방이 없어진다. sender를 break로 하여 break이 경우 모든 참가자들은 메세지와 함꼐 모두 로비로 이동.
+                String destination = "/room" + id;
+                SimpleMessageDto msgDto = new SimpleMessageDto();
+                msgDto.setSender("break");
+                msgDto.setMsg(String.format("방장이 퇴장했습니다."));
+                drawingService.sendMessage(destination, msgDto);
+                drawingService.breakRoom(id);
+            }else {
+                //퇴장 메세지
+                String destination = "/room" + id;
+                SimpleMessageDto msgDto = new SimpleMessageDto();
+                msgDto.setSender("system");
+                msgDto.setMsg(String.format("%s가 퇴장했습니다.", member.getUsername()));
+                drawingService.sendMessage(destination, msgDto);
 
-            //db데이터 변경
-            drawingService.exitRoom(id, member);
+                //db데이터 변경
+                drawingService.exitRoom(id, member);
+            }
         } else if(type.equals("dr")){
             System.out.printf("""
                     그림판은 disconnect 제외

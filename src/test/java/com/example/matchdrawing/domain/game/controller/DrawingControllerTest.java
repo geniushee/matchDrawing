@@ -147,7 +147,7 @@ public class DrawingControllerTest {
         DrawingRoomDto roomDto = createRoomDto(roomName, p);
 
         when(rq.isLogin()).thenReturn(true);
-        when(drawingService.findById(roomId)).thenReturn(roomDto);
+        when(drawingService.findRoomDtoById(roomId)).thenReturn(roomDto);
 
         MvcResult result = mockMvc.perform(get("/roby/room/{roomId}", roomId)
                                 .cookie(cookie))

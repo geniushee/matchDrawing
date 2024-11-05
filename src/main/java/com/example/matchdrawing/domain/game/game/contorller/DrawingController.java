@@ -63,9 +63,14 @@ public class DrawingController {
         return "redirect:/roby";
     }
 
+    /**
+     * 방을 만드는 메소드
+     * @param formDto 방이름, 참여 인원수 필요
+     * @return 생성된 room으로 redirect
+     */
     @PostMapping("/create")
     public String createRoom(@ModelAttribute CreateRoomDto formDto){
-       DrawingRoomDto roomDto = drawingService.createRoom(formDto.getRoomName(), formDto.getNumOfParticipants());
+       DrawingRoomDto roomDto = drawingService.createRoom(rq.getUsername(), formDto.getRoomName(), formDto.getNumOfParticipants());
        return "redirect:/roby/room/" + roomDto.getId();
     }
 
@@ -76,7 +81,7 @@ public class DrawingController {
             return  "redirect:/member/signin";
         }
 
-        DrawingRoomDto roomDto = drawingService.findById(roomId);
+        DrawingRoomDto roomDto = drawingService.findRoomDtoById(roomId);
         String destination = "/room" + roomId;
         SimpleMessageDto msgDto = new SimpleMessageDto();
         msgDto.setSender("system");

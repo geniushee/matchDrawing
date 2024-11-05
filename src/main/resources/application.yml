@@ -39,7 +39,7 @@ server:
 
 logging:
   level:
-    com.example.drawingmatching : debug
+    com.example.matchingdrawing : debug
     org.hibernate.sql : debug
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE

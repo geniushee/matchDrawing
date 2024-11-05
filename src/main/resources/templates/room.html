@@ -15,6 +15,12 @@
             console.log("Connected: " + frame)
             stompClient.subscribe(`/topic/room${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
+                if(jsonData.sender === "break"){
+                    // 방장이 나갔다는 메세지 출력
+                    alert(jsonData.msg);
+                    // alert가 종료되면 자동으로 리디렉션
+                    window.location.href = "http://localhost:8080/roby/list";
+                }
 
                 if (jsonData.sender === "system" && jsonData.msg.includes("참가")) {
                     plusMember();
@@ -72,7 +78,7 @@
         <input id="send" name="send" type="text"> <button type="submit" onclick="postMsg(event);">보내기</button>
     </form>
     <section>
-        <button onclick="startGame()">게임시작</button><span> </span><button onclick="goBack()">나가기</button>
+        <button onclick="startGame()">게임시작</button><span> </span><button onclick="exit()">나가기</button>
     </section>
 
     <script>
@@ -103,9 +109,9 @@
             sendMsg.value = "";
         }
 
-        function goBack() {
+        function exit() {
             event.preventDefault();
-            window.history.back();
+            window.location.href = "http://localhost:8080/roby/list";
         }
     </script>
 </body>

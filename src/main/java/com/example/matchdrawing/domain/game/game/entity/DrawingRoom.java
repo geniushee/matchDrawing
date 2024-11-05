@@ -2,10 +2,7 @@ package com.example.matchdrawing.domain.game.game.entity;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.global.entity.TimeEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +19,8 @@ import java.util.List;
 public class DrawingRoom extends TimeEntity {
 
     private String roomName;
+    @OneToOne
+    private Member owner;
     private int numOfParticipants;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "drawing_room_id")
@@ -56,5 +55,9 @@ public class DrawingRoom extends TimeEntity {
 
     public boolean isEmpty() {
         return curMember.isEmpty();
+    }
+
+    public boolean isOwner(Member member) {
+        return owner.getId().equals(member.getId());
     }
 }

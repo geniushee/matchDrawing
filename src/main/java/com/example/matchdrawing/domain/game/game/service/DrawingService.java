@@ -4,6 +4,7 @@ import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.entity.DrawingRoom;
 import com.example.matchdrawing.domain.game.game.repository.DrawingRoomRepository;
 import com.example.matchdrawing.domain.member.member.entity.Member;
+import com.example.matchdrawing.domain.member.member.service.MemberService;
 import com.example.matchdrawing.global.config.websocket.dto.StompTemplate;
 import com.example.matchdrawing.global.dto.MessageDto;
 import com.example.matchdrawing.global.dto.SimpleMessageDto;
@@ -23,12 +24,15 @@ public class DrawingService {
 
     private final DrawingRoomRepository drawingRoomRepository;
     private final StompTemplate template;
+    private final MemberService memberService;
 
 
     @Transactional
-    public DrawingRoomDto createRoom(String roomName, int numOfParticipant) {
+    public DrawingRoomDto createRoom(String username, String roomName, int numOfParticipant) {
+        Member user = memberService.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         DrawingRoom room = DrawingRoom.builder()
                 .roomName(roomName)
+                .owner(user)
                 .numOfParticipants(numOfParticipant)
                 .build();
 
@@ -57,9 +61,8 @@ public class DrawingService {
         return false;
     }
 
-    public DrawingRoomDto findById(Long roomId) {
-        DrawingRoom room = drawingRoomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("잘못된 방입니다."));
-        return new DrawingRoomDto(room);
+    public DrawingRoomDto findRoomDtoById(Long roomId) {
+        return new DrawingRoomDto(findById(roomId));
     }
 
     public Long countRooms() {
@@ -79,7 +82,7 @@ public class DrawingService {
 
     @Transactional
     public void exitRoom(Long id, Member member) {
-        DrawingRoom room = drawingRoomRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("잘못된 방입니다."));
+        DrawingRoom room = findById(id);
 
         System.out.println("들어있나 확인 : " + room.containMember(member));
         if(room.containMember(member)){
@@ -91,8 +94,26 @@ public class DrawingService {
         System.out.println("비어있나 확인 : " + room.isEmpty());
         if(room.isEmpty()){
             System.out.println("방 제거");
-            drawingRoomRepository.delete(room);
+            breakRoom(room);
         }
     }
 
+    @Transactional
+    public void breakRoom(DrawingRoom room){
+        drawingRoomRepository.delete(room);
+    }
+
+    @Transactional
+    public void breakRoom(Long roomId){
+        breakRoom(findById(roomId));
+    }
+
+    public boolean isOwner(Long roomId, Member member) {
+        DrawingRoom room = findById(roomId);
+        return room.isOwner(member);
+    }
+
+    private DrawingRoom findById(Long id){
+        return drawingRoomRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("잘못된 방입니다."));
+    }
 }
