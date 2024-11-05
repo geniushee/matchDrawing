@@ -1,4 +1,4 @@
-package com.example.matchdrawing.global.config.websocket;
+package com.example.matchdrawing.global.config.websocket.dto;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import lombok.AllArgsConstructor;

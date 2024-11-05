@@ -1,15 +1,12 @@
 spring:
-  profiles:
-    active: dev
-    include: secret, websocket
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:./dev_db;MODE=MYSQL;
-    username: sa
+    url: jdbc:h2:mem:./test_db;DB_CLOSE_DELAY=-1;MODE=MYSQL;
+    username:
     password:
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
@@ -34,15 +31,12 @@ spring:
 #    username: "${custom.rabbitmq.username}"
 #    password: "${custom.rabbitmq.password}"
 
-server:
-  port: 8080
-
 logging:
   level:
-    com.example.drawingmatching : debug
-    org.hibernate.sql : debug
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
+    com.example.matchdrawing : debug
+    org.hibernate.SQL : debug
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # SQL 바인딩 정보 표시
+    org.hibernate.type.descriptor.sql.BasicExtractor: TRACE  # SQL 추출 정보 표시
     org.springframework.transaction.interceptor: TRACE
 #    org.springframework.kafka : debug
 

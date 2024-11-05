@@ -1,4 +1,4 @@
-package com.example.matchdrawing.global.config.websocket;
+package com.example.matchdrawing.global.config.websocket.config;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
@@ -57,8 +57,10 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
             if (loginCookie != null) {
                 Optional<Member> opMember = memberService.findByUsername(loginCookie.getValue());
                 if (opMember.isPresent()) {
+                    System.out.println("사용자 정보 주입!");
                     member = opMember.get();
                     attributes.put("user", member);
+                    attributes.put("type", "msg");
                 }
             }
 

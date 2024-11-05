@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" layout:decorate="~{global/layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
+
 <body layout:fragment="content">
     <main style="display: flex;">
         <!-- 그리는 사람 제외 비활성화 필요 -->
@@ -34,26 +36,37 @@
         </section>
         <!--캔버스-->
         <canvas id="canvas" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
-    </main>    
+    </main>
 
     <script>
-        const roomId = [[${roomId}]]
-        const socket = new SockJS('http://localhost:8080/dr');
-        const stompClient = Stomp.over(socket);
-        
+        const roomId = [[${ roomId }]]
+        const socket_dr = new SockJS('http://localhost:8080/dr');
+        const stompClient_dr = Stomp.over(socket_dr);
+        const socket_msg = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
+        const stompClient_msg = Stomp.over(socket_msg);
 
-        stompClient.connect({}, function (frame) {
+        // 방장과 참여자를 나누어서 캔버스를 나누어 구현할 필요가 있음.
+
+
+        stompClient_dr.connect({}, function (frame) {
             console.log("Connected: " + frame)
-            stompClient.subscribe(`/topic/drawing${roomId}`, function (data) {
+            stompClient_dr.subscribe(`/topic/drawing${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
-                canvas.loadFromJSON(jsonData.msg)
-                console.log(`${jsonData.sender} : ${jsonData.msg}`)
+                if (typeof jsonData.msg === 'string' & jsonData.msg.includes("method")) {
+                    let methodName = jsonData.msg.split(":")[1];
+                    if (methodName === "clear") {
+                        canvas.clear()
+                    }
+                }else{
+                    canvas.loadFromJSON(jsonData.msg)
+                    console.log(`${jsonData.sender} : ${jsonData.msg}`)
+                }
             })
         });
 
-        stompClient.connect({}, function (frame) {
+        stompClient_msg.connect({}, function (frame) {
             console.log("Connected: " + frame)
-            stompClient.subscribe(`/topic/room${roomId}`, function (data) {
+            stompClient_msg.subscribe(`/topic/room${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
                 let msgBox = document.getElementById('msgBox');
                 let msgBit = document.createElement("div");
@@ -72,7 +85,6 @@
                 pencilWidth = $('widthPick'),
                 clear = $('clearBt');
 
-
             const canvas = new fabric.Canvas('canvas', {
                 isDrawingMode: true
             });
@@ -90,7 +102,7 @@
                 console.log("JSON : " + jsonData)
 
                 // 그리기 공유
-                stompClient.send(`/app/drawing${roomId}`,{},JSON.stringify({msg:jsonData}))
+                stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: jsonData }))
             })
 
             // 새로운 캔버스에 옮겨지면 재렌더링
@@ -114,7 +126,7 @@
                 canvas.freeDrawingBrush.width = this.value;
             }
 
-            $('pencilDefault').onclick = function(){
+            $('pencilDefault').onclick = function () {
                 canvas.freeDrawingBrush.color = '#000000';
                 canvas.freeDrawingBrush.width = 5;
             }
@@ -131,13 +143,14 @@
 
             clear.onclick = function () {
                 canvas.clear();
-                
+
                 // 그리기 공유
-                stompClient.send(`/app/drawing${roomId}`,{},JSON.stringify({msg:"method:clear"}))
+                stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: "method:clear" }))
             }
 
         })();
 
     </script>
 </body>
+
 </html>

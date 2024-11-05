@@ -4,7 +4,7 @@ import com.example.matchdrawing.domain.game.game.dto.CreateRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.global.Rq;
-import com.example.matchdrawing.global.config.websocket.CustomPrincipal;
+import com.example.matchdrawing.global.config.websocket.dto.CustomPrincipal;
 import com.example.matchdrawing.global.dto.DrawingDataMessageDto;
 import com.example.matchdrawing.global.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;

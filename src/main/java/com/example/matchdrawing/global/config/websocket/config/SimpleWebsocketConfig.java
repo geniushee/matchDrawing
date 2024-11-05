@@ -1,7 +1,5 @@
-package com.example.matchdrawing.global.config;
+package com.example.matchdrawing.global.config.websocket.config;
 
-import com.example.matchdrawing.global.config.websocket.CustomHandshakeHandler;
-import com.example.matchdrawing.global.config.websocket.WebsocketHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -17,17 +15,19 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class SimpleWebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final CustomHandshakeHandler customHandshakeHandler;
-    private final WebsocketHandshakeInterceptor websocketHandshakeInterceptor;
+    private final WebsocketHandshakeInterceptor msgHandshakeInterceptor;
+    private final WebsocketDrawingHandshakeInterceptor drawingHandshakeInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("*")
-                .addInterceptors(websocketHandshakeInterceptor)
+                .setAllowedOrigins("localhost")
+                .addInterceptors(msgHandshakeInterceptor)
                 .setHandshakeHandler(customHandshakeHandler)
                 .withSockJS();
 
         registry.addEndpoint("/dr")
+                .addInterceptors(drawingHandshakeInterceptor)
                 .withSockJS();
     }
 

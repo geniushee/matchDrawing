@@ -37,6 +37,9 @@ out/
 .vscode/
 
 ### etc ###
+dev_db.mv.db
+dev_db.trace.db
 test_db.mv.db
+test_db.trace.db
 node_modules/
 ticket.py

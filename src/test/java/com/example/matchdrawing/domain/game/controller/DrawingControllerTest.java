@@ -1,10 +1,11 @@
-package com.example.matchdrawing.domain.game;
+package com.example.matchdrawing.domain.game.controller;
 
 import com.example.matchdrawing.domain.game.game.contorller.DrawingController;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.domain.member.member.dto.MemberDto;
 import com.example.matchdrawing.global.Rq;
+import com.example.matchdrawing.global.dto.SimpleMessageDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,16 +21,11 @@ import org.springframework.mock.web.MockCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,28 +52,25 @@ public class DrawingControllerTest {
 
     private MockCookie cookie;
 
-    private Optional<MvcResult> mvcResult;
-
-
+    private String mvcResult;
 
 
     @BeforeEach
     void setUp() {
-
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(new DrawingController(drawingService, rq)).build();
-
         cookie = new MockCookie("login", "user1");
+        mvcResult = null;
     }
 
     @AfterEach
     void showResult() throws UnsupportedEncodingException {
-        if (mvcResult != null & mvcResult.isPresent()) {
-            System.out.println(mvcResult.get().getResponse().getContentAsString());
+        if (mvcResult != null) {
+            System.out.println(mvcResult);
         }
     }
 
-    private DrawingRoomDto createRoomDto(String roomName, int p){
+    private DrawingRoomDto createRoomDto(String roomName, int p) {
         return new DrawingRoomDto(
                 1L,
                 LocalDateTime.now(),
@@ -86,6 +79,13 @@ public class DrawingControllerTest {
                 new ArrayList<>(),
                 p,
                 0);
+    }
+
+    private SimpleMessageDto createMSGDto(String msg, String sender) {
+        SimpleMessageDto dto = new SimpleMessageDto();
+        dto.setMsg(msg);
+        dto.setSender(sender);
+        return dto;
     }
 
     @Test
@@ -144,10 +144,22 @@ public class DrawingControllerTest {
         String roomName = "room1";
         int p = 3;
 
-        when(drawingService.findById(roomId)).thenReturn(createRoomDto(roomName, p));
+        DrawingRoomDto roomDto = createRoomDto(roomName, p);
 
-        mockMvc.perform(get("/roby/room/{roomId}",roomId)
-                        .cookie(cookie))
-                .andReturn();
+        when(rq.isLogin()).thenReturn(true);
+        when(drawingService.findById(roomId)).thenReturn(roomDto);
+
+        MvcResult result = mockMvc.perform(get("/roby/room/{roomId}", roomId)
+                                .cookie(cookie))
+                        .andExpect(status().isOk())
+                        .andExpect(view().name("room"))
+                        .andExpect(model().attribute("roomDto", roomDto))
+                        .andReturn();
+        mvcResult = result.getResponse().getContentAsString();
+        /*
+        webMvcTest에서는 렌더링이 되지 않기 때문에 html을 직접 확인하기는 어렵다고 한다.
+        assertThat(mvcResult).as("roomDto 전달 여부 확인").contains("방이름 : " + roomDto.getRoomName());
+         */
     }
+
 }

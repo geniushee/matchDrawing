@@ -1,6 +1,7 @@
-package com.example.matchdrawing.global.config.websocket;
+package com.example.matchdrawing.global.config.websocket.config;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
+import com.example.matchdrawing.global.config.websocket.dto.CustomPrincipal;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;

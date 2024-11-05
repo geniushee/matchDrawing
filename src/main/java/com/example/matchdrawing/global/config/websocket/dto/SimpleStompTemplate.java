@@ -1,4 +1,4 @@
-package com.example.matchdrawing.global.config;
+package com.example.matchdrawing.global.config.websocket.dto;
 
 import com.example.matchdrawing.global.dto.MessageDto;
 import lombok.RequiredArgsConstructor;
