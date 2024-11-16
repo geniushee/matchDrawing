@@ -2,6 +2,7 @@ package com.example.matchdrawing.domain.game.game.entity;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.global.entity.TimeEntity;
+import groovyjarjarantlr4.v4.runtime.misc.NotNull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,13 +17,14 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DrawingRoom extends TimeEntity {
-
+public class DrawingRoom extends TimeEntity implements Room {
+    @NotNull
+    private RoomStatus type;
     private String roomName;
     @OneToOne
     private Member owner;
     private int numOfParticipants;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @JoinColumn(name = "drawing_room_id")
     @Builder.Default
     private List<Member> curMember = new ArrayList<>();
@@ -59,5 +61,19 @@ public class DrawingRoom extends TimeEntity {
 
     public boolean isOwner(Member member) {
         return owner.getId().equals(member.getId());
+    }
+
+    @Override
+    public RoomStatus getType() {
+        return type;
+    }
+
+    @Override
+    public void changeStatus(String status) {
+        switch (status){
+            case "WAITING" -> type = RoomStatus.WAITING;
+            case "LOADING" -> type = RoomStatus.LOADING;
+            case "PLAYING" -> type = RoomStatus.PLAYING;
+        }
     }
 }

@@ -13,7 +13,7 @@
 <body layout:fragment="content">
     <main style="display: flex;">
         <!-- 그리는 사람 제외 비활성화 필요 -->
-        <section style="border : 1px solid; padding: 5px; max-width: 20%">
+        <section id="tools" style="border : 1px solid; padding: 5px; max-width: 20%">
             <div style="margin-left: 5px; margin-bottom: 10px;">
                 <button id="pencil">pencil</button>
                 <button id="eraser">eraser</button>
@@ -38,32 +38,44 @@
         <canvas id="canvas" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
     </main>
 
-    <script>
-        const roomId = [[${ roomId }]]
+    <script th:inline="javascript">
+        const username = [[${@rq.getUsername() }]];
+        const roomInfo = [[${ roomDto }]]
+        const roomId = roomInfo.id;
         const socket_dr = new SockJS('http://localhost:8080/dr');
         const stompClient_dr = Stomp.over(socket_dr);
         const socket_msg = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
         const stompClient_msg = Stomp.over(socket_msg);
 
         // 방장과 참여자를 나누어서 캔버스를 나누어 구현할 필요가 있음.
+        function isOwner() {
+            if (username == roomInfo.owner.username) {
+                return true;
+            }
+            return false;
+        }
 
 
+        // 캔버스
         stompClient_dr.connect({}, function (frame) {
             console.log("Connected: " + frame)
             stompClient_dr.subscribe(`/topic/drawing${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
+                
+                // 클리어 메소드 동기화
                 if (typeof jsonData.msg === 'string' & jsonData.msg.includes("method")) {
                     let methodName = jsonData.msg.split(":")[1];
                     if (methodName === "clear") {
                         canvas.clear()
                     }
-                }else{
+                } else {
                     canvas.loadFromJSON(jsonData.msg)
                     console.log(`${jsonData.sender} : ${jsonData.msg}`)
                 }
             })
         });
 
+        // 채팅
         stompClient_msg.connect({}, function (frame) {
             console.log("Connected: " + frame)
             stompClient_msg.subscribe(`/topic/room${roomId}`, function (data) {
@@ -73,6 +85,16 @@
                 msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
                 msgBox.appendChild(msgBit);
             })
+        });
+
+        // 방장만 그리기 도구가 보이도록
+        document.addEventListener('DOMContentLoaded', function () {
+            const tools = document.getElementById('tools');
+            if (username === roomInfo.owner.username) {
+                tools.style.display = 'block';
+            } else {
+                tools.style.display = 'none';
+            }
         });
 
 
@@ -85,67 +107,72 @@
                 pencilWidth = $('widthPick'),
                 clear = $('clearBt');
 
-            const canvas = new fabric.Canvas('canvas', {
-                isDrawingMode: true
-            });
 
-            if (!canvas.freeDrawingBrush) {
-                canvas.freeDrawingBrush = new fabric['PencilBrush'](canvas);
-                canvas.freeDrawingBrush.color = pencilColor.value;
-                canvas.freeDrawingBrush.width = pencilWidth.value;
-            }
+            // 방장 여부에 따른 캔버스 구분
+            if (isOwner()) {
+                const canvas = new fabric.Canvas('canvas', {
+                    isDrawingMode: true
+                });
 
-            // 그림이 그려질 때마다 데이터 생성
-            canvas.on("path:created", function () {
-                // 그림 데이터 json으로 생성
-                var jsonData = JSON.stringify(canvas);
-                console.log("JSON : " + jsonData)
+                if (!canvas.freeDrawingBrush) {
+                    canvas.freeDrawingBrush = new fabric['PencilBrush'](canvas);
+                    canvas.freeDrawingBrush.color = pencilColor.value;
+                    canvas.freeDrawingBrush.width = pencilWidth.value;
+                }
 
-                // 그리기 공유
-                stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: jsonData }))
-            })
+                // 그림이 그려질 때마다 데이터 생성
+                canvas.on("path:created", function () {
+                    // 그림 데이터 json으로 생성
+                    var jsonData = JSON.stringify(canvas);
+                    console.log("JSON : " + jsonData)
 
-            // 새로운 캔버스에 옮겨지면 재렌더링
-            canvas.on('object:added', function () {
-                // 그리는 사람 제외 비활성화 필요
-                // var objs = canvas.getObjects();
-                // for(var i = 0, len = objs.length; i < len; i++){
-                //     objs[i].selectable = false;
-                // }
-                canvas.renderAll();
-            })
+                    // 그리기 공유
+                    stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: jsonData }))
+                })
 
 
-            pencilColor.onchange = function () {
-                canvas.freeDrawingBrush.color = this.value;
-                canvas.freeDrawingBrush.width = pencilWidth.value;
-            }
+                pencilColor.onchange = function () {
+                    canvas.freeDrawingBrush.color = this.value;
+                    canvas.freeDrawingBrush.width = pencilWidth.value;
+                }
 
-            pencilWidth.onchange = function () {
-                canvas.freeDrawingBrush.color = pencilColor.value;
-                canvas.freeDrawingBrush.width = this.value;
-            }
+                pencilWidth.onchange = function () {
+                    canvas.freeDrawingBrush.color = pencilColor.value;
+                    canvas.freeDrawingBrush.width = this.value;
+                }
 
-            $('pencilDefault').onclick = function () {
-                canvas.freeDrawingBrush.color = '#000000';
-                canvas.freeDrawingBrush.width = 5;
-            }
+                $('pencilDefault').onclick = function () {
+                    canvas.freeDrawingBrush.color = '#000000';
+                    canvas.freeDrawingBrush.width = 5;
+                }
 
-            eraser.onclick = function () {
-                canvas.freeDrawingBrush.color = '#ffffff';
-                canvas.freeDrawingBrush.width = 20;
-            }
+                eraser.onclick = function () {
+                    canvas.freeDrawingBrush.color = '#ffffff';
+                    canvas.freeDrawingBrush.width = 20;
+                }
 
-            pencil.onclick = function () {
-                canvas.freeDrawingBrush.color = pencilColor.value;
-                canvas.freeDrawingBrush.width = pencilWidth.value;
-            }
+                pencil.onclick = function () {
+                    canvas.freeDrawingBrush.color = pencilColor.value;
+                    canvas.freeDrawingBrush.width = pencilWidth.value;
+                }
 
-            clear.onclick = function () {
-                canvas.clear();
+                clear.onclick = function () {
+                    canvas.clear();
 
-                // 그리기 공유
-                stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: "method:clear" }))
+                    // 그리기 공유
+                    stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: "method:clear" }))
+                }
+            } else {
+                const canvas = new fabric.Canvas('canvas');
+                // 새로운 캔버스에 옮겨지면 재렌더링
+                canvas.on('object:added', function () {
+                    // 그리는 사람 제외 비활성화 필요
+                    // var objs = canvas.getObjects();
+                    // for(var i = 0, len = objs.length; i < len; i++){
+                    //     objs[i].selectable = false;
+                    // }
+                    canvas.renderAll();
+                })
             }
 
         })();

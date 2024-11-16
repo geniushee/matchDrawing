@@ -3,62 +3,6 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
-    <script>
-        const roomId = [[${ roomDto.id }]];
-        let curParticipants = [[${ roomDto.numOfCurParticipants }]]
-
-        const socket = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
-        const stompClient = Stomp.over(socket);
-
-
-        stompClient.connect({}, function (frame) {
-            console.log("Connected: " + frame)
-            stompClient.subscribe(`/topic/room${roomId}`, function (data) {
-                let jsonData = JSON.parse(data.body)
-                if(jsonData.sender === "break"){
-                    // 방장이 나갔다는 메세지 출력
-                    alert(jsonData.msg);
-                    // alert가 종료되면 자동으로 리디렉션
-                    window.location.href = "http://localhost:8080/roby/list";
-                }
-
-                if (jsonData.sender === "system" && jsonData.msg.includes("참가")) {
-                    plusMember();
-                }
-
-                if (jsonData.sender === "system" && jsonData.msg.includes("퇴장")) {
-                    minusMember();
-                }
-                if (jsonData.sender === "system" && jsonData.msg.includes("http://")) {
-                    var newUrl = jsonData.msg;
-                    window.location.href = newUrl;
-                }
-                
-                let msgBox = document.getElementById('msgBox');
-                let msgBit = document.createElement("div");
-                msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
-                msgBox.appendChild(msgBit);
-            })
-        });
-
-
-
-        window.addEventListener('beforeunload', function (event) {
-            stompClient.disconnect(() => {
-                console.log("disconnect ws")
-            });
-        })
-
-        function plusMember() {
-            curParticipants = curParticipants + 1;
-            document.getElementById('curParticipants').innerText = curParticipants;
-        }
-
-        function minusMember() {
-            curParticipants = curParticipants - 1;
-            document.getElementById('curParticipants').innerText = curParticipants;
-        }
-    </script>
 </head>
 
 <body layout:fragment="content">
@@ -78,13 +22,93 @@
         <input id="send" name="send" type="text"> <button type="submit" onclick="postMsg(event);">보내기</button>
     </form>
     <section>
-        <button onclick="startGame()">게임시작</button><span> </span><button onclick="exit()">나가기</button>
+        <button th:if="${@rq.getUsername() == roomDto.owner.username}" onclick="startGame()">게임시작</button><span>
+        </span><button onclick="exit()">나가기</button>
     </section>
 
-    <script>
+    <script th:inline="javascript">
+        const user = [[${@rq.getUsername() }]]
+        let state = [[${ roomDto.status }]]
+        console.log(user)
+        const roomId = [[${ roomDto.id }]];
+        let curParticipants = [[${ roomDto.numOfCurParticipants }]]
+
+        const socket = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
+        const stompClient = Stomp.over(socket);
+
+
+        stompClient.connect({}, function (frame) {
+            console.log("Connected: " + frame)
+            stompClient.subscribe(`/topic/room${roomId}`, function (data) {
+                // message data
+                let jsonData = JSON.parse(data.body)
+
+                if (jsonData.sender === "break") {
+                    // 방장이 나갔다는 메세지 출력
+                    alert(jsonData.msg);
+                    // alert가 종료되면 자동으로 리디렉션
+                    window.location.href = "http://localhost:8080/roby/list";
+                }
+
+                // 게임 시작 트리거
+                if (jsonData.sender === "start") {
+                    var newUrl = jsonData.msg;
+                    window.location.href = newUrl;
+                } else {
+                    if (jsonData.sender === "system" && jsonData.msg.includes("참가")) {
+                        plusMember();
+                    }
+
+                    if (jsonData.sender === "system" && jsonData.msg.includes("퇴장")) {
+                        minusMember();
+                    }
+
+                    let msgBox = document.getElementById('msgBox');
+                    let msgBit = document.createElement("div");
+                    msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
+                    msgBox.appendChild(msgBit);
+                }
+            })
+        });
+
+
+
+        window.addEventListener('beforeunload', function (event) {
+            stompClient.disconnect(() => {
+                console.log("disconnect ws")
+            });
+        })
+
+        function plusMember() {
+            curParticipants = curParticipants;
+            document.getElementById('curParticipants').innerText = curParticipants;
+        }
+
+        function minusMember() {
+            curParticipants = curParticipants - 1;
+            document.getElementById('curParticipants').innerText = curParticipants;
+        }
         plusMember();
 
+        async function changeStatus() {
+            const url = "http://localhost:8080/api/game/changeStatus";
+            const response = await fetch(url,
+                {
+                    method: "POST",
+                    headers: {'Content-Type' : 'application/json'},
+                    body: JSON.stringify({
+                        id: roomId,
+                        status: "LOADING"
+                    })
+                }
+            );
+            if (!response.ok){
+                exit();
+            }
+        }
+
         function startGame() {
+            changeStatus();
             startCountDown(5);
         }
 

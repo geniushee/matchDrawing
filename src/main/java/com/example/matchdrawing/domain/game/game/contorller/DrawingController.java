@@ -8,18 +8,11 @@ import com.example.matchdrawing.global.config.websocket.dto.CustomPrincipal;
 import com.example.matchdrawing.global.dto.DrawingDataMessageDto;
 import com.example.matchdrawing.global.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,19 +28,8 @@ public class DrawingController {
     }
 
     @GetMapping("/list")
-    public String showRoomList(Model model) {
-        //page 설정
-        int pageSize = 5;
-        int pageNum = 0;
-        List<Sort.Order> orders = new ArrayList<>();
-        orders.add(Sort.Order.desc("createTime"));
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(orders));
-
-        Page<DrawingRoomDto> list = drawingService.getRoomList(pageable);
-        model.addAttribute("roomList", list);
-
+    public String showList(){
         return "roomList";
-
     }
 
 //    @GetMapping("/{id}")
@@ -97,7 +79,7 @@ public class DrawingController {
                             CustomPrincipal user){
         if(drawingService.checkEventStartGame(msgDto)){
             msgDto.setMsg("http://localhost:8080/roby/game/"+id);
-            msgDto.setSender("system");
+            msgDto.setSender("start");
         }else{
             msgDto.setSender(user.getName());
         }
@@ -122,7 +104,9 @@ public class DrawingController {
     @GetMapping("/game/{id}")
     public String startGame(@PathVariable(name = "id")Long roomId,
                           Model model){
-        model.addAttribute("roomId", roomId);
+        DrawingRoomDto dto =  drawingService.findRoomDtoById(roomId);
+
+        model.addAttribute("roomDto", dto);
         return "gameRoom";
     }
 }

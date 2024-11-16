@@ -2,6 +2,7 @@ package com.example.matchdrawing.domain.game.controller;
 
 import com.example.matchdrawing.domain.game.game.contorller.DrawingController;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
+import com.example.matchdrawing.domain.game.game.entity.RoomStatus;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.domain.member.member.dto.MemberDto;
 import com.example.matchdrawing.global.Rq;
@@ -73,9 +74,11 @@ public class DrawingControllerTest {
     private DrawingRoomDto createRoomDto(String roomName, int p) {
         return new DrawingRoomDto(
                 1L,
+                RoomStatus.WAITING,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 roomName,
+                new MemberDto("user1"),
                 new ArrayList<>(),
                 p,
                 0);
@@ -91,14 +94,7 @@ public class DrawingControllerTest {
     @Test
     void showRoomListTest() throws Exception {
         Page<DrawingRoomDto> page = new PageImpl<>(
-                List.of(
-                        new DrawingRoomDto(1L,
-                                LocalDateTime.now(),
-                                LocalDateTime.now(),
-                                "roomName",
-                                List.of(new MemberDto("user")),
-                                3,
-                                0)));
+                List.of(createRoomDto("roomName",2)));
         when(this.drawingService.getRoomList(PageRequest.of(0, 5, Sort.by("createTime").descending()))).thenReturn(page);
 
         mockMvc.perform(get("/roby/list"))
@@ -106,8 +102,7 @@ public class DrawingControllerTest {
                 /* veiwResolver 순환참조 문제발생
                 url의 list와 view 'list'가 순환참조되는 문제로 인하여 view이름을 roomList로 변경
                  */
-                .andExpect(view().name("roomList"))
-                .andExpect(model().attributeExists("roomList"));
+                .andExpect(view().name("roomList"));
     }
 
     @Test
@@ -128,7 +123,9 @@ public class DrawingControllerTest {
 
         DrawingRoomDto roomDto = createRoomDto(roomName, p);
 
-        when(drawingService.createRoom("room1", 3))
+        when(rq.getUsername())
+                .thenReturn("user1");
+        when(drawingService.createRoom(rq.getUsername(), "room1", 3))
                 .thenReturn(roomDto);
 
         mockMvc.perform(post("/roby/create")

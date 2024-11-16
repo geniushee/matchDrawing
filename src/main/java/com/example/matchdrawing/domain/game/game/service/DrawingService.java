@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+
+import static com.example.matchdrawing.domain.game.game.entity.RoomStatus.WAITING;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +34,15 @@ public class DrawingService {
     public DrawingRoomDto createRoom(String username, String roomName, int numOfParticipant) {
         Member user = memberService.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         DrawingRoom room = DrawingRoom.builder()
+                .type(WAITING)
                 .roomName(roomName)
                 .owner(user)
                 .numOfParticipants(numOfParticipant)
                 .build();
 
         room = drawingRoomRepository.save(room);
+        enterWaitingRoom(room.getId(), user);
+
         return new DrawingRoomDto(room);
     }
 
@@ -72,8 +78,17 @@ public class DrawingService {
     @Transactional
     public void enterWaitingRoom(Long id, Member member) {
         DrawingRoom room = drawingRoomRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("잘못된 방입니다."));
-        if (!room.isMax() && !room.getCurMember().contains(member)) {
-            room.enterMember(member);
+        if (!room.isMax()){
+            List<Member> curMember = room.getCurMember();
+            Optional<Member> opMember = Optional.empty();
+            for(Member mem : curMember){
+                if(mem.getId().equals(member.getId())){
+                    opMember = Optional.of(mem);
+                }
+            }
+            if(opMember.isEmpty()) {
+                room.enterMember(member);
+            }
         } else {
             return;
         }
@@ -115,5 +130,15 @@ public class DrawingService {
 
     private DrawingRoom findById(Long id){
         return drawingRoomRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("잘못된 방입니다."));
+    }
+
+    public boolean isWaiting(Long id) {
+        return findById(id).getType().equals(WAITING);
+    }
+
+    @Transactional
+    public void changeRoomStatus(Long id, String status) {
+        DrawingRoom room = findById(id);
+        room.changeStatus(status);
     }
 }
