@@ -12,30 +12,35 @@
 
 <body layout:fragment="content">
     <main style="display: flex;">
-        <!-- 그리는 사람 제외 비활성화 필요 -->
-        <section id="tools" style="border : 1px solid; padding: 5px; max-width: 20%">
-            <div style="margin-left: 5px; margin-bottom: 10px;">
-                <button id="pencil">pencil</button>
-                <button id="eraser">eraser</button>
-                <button id="clearBt">clear</button>
-            </div>
-            <section style="margin: 5px">
-                <div>pencil options</div>
-                <p>
-                    <label for="colorPick">color : </label>
-                    <input type="color" value="#000000" id="colorPick">
-                </p>
-                <p>
-                    <label for="widthPick">width : </label>
-                    <input style="width: 5em;" type="number" value="5" id="widthPick">
-                </p>
-                <p>
-                    <button id="pencilDefault">기본 연필</button>
-                </p>
-            </section>
+        <section id="loading">
+            Loading...
         </section>
-        <!--캔버스-->
-        <canvas id="canvas" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
+        <section id="main" style="display: none;">
+            <!-- 그리는 사람 제외 비활성화 필요 -->
+            <section id="tools" style="border : 1px solid; padding: 5px; max-width: 20%">
+                <div style="margin-left: 5px; margin-bottom: 10px;">
+                    <button id="pencil">pencil</button>
+                    <button id="eraser">eraser</button>
+                    <button id="clearBt">clear</button>
+                </div>
+                <section style="margin: 5px">
+                    <div>pencil options</div>
+                    <p>
+                        <label for="colorPick">color : </label>
+                        <input type="color" value="#000000" id="colorPick">
+                    </p>
+                    <p>
+                        <label for="widthPick">width : </label>
+                        <input style="width: 5em;" type="number" value="5" id="widthPick">
+                    </p>
+                    <p>
+                        <button id="pencilDefault">기본 연필</button>
+                    </p>
+                </section>
+            </section>
+            <!--캔버스-->
+            <canvas id="canvas" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
+        </section>
     </main>
 
     <script th:inline="javascript">
@@ -44,8 +49,14 @@
         const roomId = roomInfo.id;
         const socket_dr = new SockJS('http://localhost:8080/dr');
         const stompClient_dr = Stomp.over(socket_dr);
+        stompClient_dr.debug = (msg) => {
+            console.log('[STOMP dr_client Debug]:', msg)
+        }
         const socket_msg = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
         const stompClient_msg = Stomp.over(socket_msg);
+        stompClient_msg.debug = (msg) => {
+            console.log('[STOMP msg_client Debug]:', msg)
+        }
 
         // 방장과 참여자를 나누어서 캔버스를 나누어 구현할 필요가 있음.
         function isOwner() {
@@ -55,29 +66,78 @@
             return false;
         }
 
-
-        // 캔버스
-        stompClient_dr.connect({}, function (frame) {
-            console.log("Connected: " + frame)
-            stompClient_dr.subscribe(`/topic/drawing${roomId}`, function (data) {
-                let jsonData = JSON.parse(data.body)
-                
-                // 클리어 메소드 동기화
-                if (typeof jsonData.msg === 'string' & jsonData.msg.includes("method")) {
-                    let methodName = jsonData.msg.split(":")[1];
-                    if (methodName === "clear") {
-                        canvas.clear()
-                    }
-                } else {
-                    canvas.loadFromJSON(jsonData.msg)
-                    console.log(`${jsonData.sender} : ${jsonData.msg}`)
+        // 로딩 구현
+        document.addEventListener("DOMContentLoaded", function (){
+            const loadingSection = document.getElementById("loading")
+            const mainSection = document.getElementById("main")
+            
+            //초기화
+            loadingSection.style.display = "block";
+            mainSection.style.display = "none"
+            completeLoading()
+            
+            async function isLoading() {
+                const url = "http://localhost:8080/api/game/isLoading?roomId=" + roomId;
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log(data);
+                return data;
+            }
+            
+            async function completeLoading() {
+                const url = "http://localhost:8080/api/game/completeLoading";
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        roomId: roomId,
+                        username: username,
+                    })
+                });
+            }
+            
+            async function checkLoadingComplete(){
+                const isLoaded = await isLoading();
+                if(isLoaded){
+                    loadingSection.style.display = "none";
+                    mainSection.style.display = "flex"        
+                    clearInterval(interval) //반복 중단
                 }
-            })
+            }
+
+            var interval = setInterval(checkLoadingComplete, 5000)
+        })
+
+
+
+
+
+        // 캔버스 - 오너가 아닌 경우에만 서브스크라이브
+        stompClient_dr.connect({}, function (frame) {
+            // console.log("Connected: " + frame) debug 옵션을 사용하며 불필요해짐
+            if (!isOwner()) {
+                stompClient_dr.subscribe(`/topic/drawing${roomId}`, function (data) {
+                    let jsonData = JSON.parse(data.body)
+
+                    // 클리어 메소드 동기화
+                    if (typeof jsonData.msg === 'string' & jsonData.msg.includes("method")) {
+                        let methodName = jsonData.msg.split(":")[1];
+                        if (methodName === "clear") {
+                            canvas.clear()
+                        }
+                    } else {
+                        canvas.loadFromJSON(jsonData.msg)
+                        console.log(`${jsonData.sender} : ${jsonData.msg}`)
+                    }
+                })
+            }
         });
 
         // 채팅
         stompClient_msg.connect({}, function (frame) {
-            console.log("Connected: " + frame)
+            // console.log("Connected: " + frame) debug 옵션을 사용하면서 불필요해짐
             stompClient_msg.subscribe(`/topic/room${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
                 let msgBox = document.getElementById('msgBox');
@@ -98,6 +158,15 @@
         });
 
 
+
+        // 방장 여부에 따른 캔버스 구분
+        const canvas = new fabric.Canvas('canvas');
+        if (isOwner()) {
+            canvas.isDrawingMode = true;
+        }
+
+
+        // 캔버스 기능
         (function () {
             var $ = function (id) { return document.getElementById(id); }
 
@@ -108,19 +177,15 @@
                 clear = $('clearBt');
 
 
-            // 방장 여부에 따른 캔버스 구분
+            // 방장 여부에 따른 캔버스 기능 구분
             if (isOwner()) {
-                const canvas = new fabric.Canvas('canvas', {
-                    isDrawingMode: true
-                });
-
                 if (!canvas.freeDrawingBrush) {
                     canvas.freeDrawingBrush = new fabric['PencilBrush'](canvas);
                     canvas.freeDrawingBrush.color = pencilColor.value;
                     canvas.freeDrawingBrush.width = pencilWidth.value;
                 }
 
-                // 그림이 그려질 때마다 데이터 생성
+                // 그림이 그려질 때마다 데이터 생성 - 그림이 일정이상 그려지면 데이터의 크기가 Stomp에서 제한하는 크기 이상이 되어 연결이 끊김
                 canvas.on("path:created", function () {
                     // 그림 데이터 json으로 생성
                     var jsonData = JSON.stringify(canvas);
@@ -163,7 +228,6 @@
                     stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: "method:clear" }))
                 }
             } else {
-                const canvas = new fabric.Canvas('canvas');
                 // 새로운 캔버스에 옮겨지면 재렌더링
                 canvas.on('object:added', function () {
                     // 그리는 사람 제외 비활성화 필요

@@ -2,7 +2,9 @@ package com.example.matchdrawing.domain.game.game.service;
 
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.entity.DrawingRoom;
+import com.example.matchdrawing.domain.game.game.entity.LoadingRoom;
 import com.example.matchdrawing.domain.game.game.repository.DrawingRoomRepository;
+import com.example.matchdrawing.domain.game.game.repository.LoadingRoomRepository;
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
 import com.example.matchdrawing.global.config.websocket.dto.StompTemplate;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.matchdrawing.domain.game.game.entity.RoomStatus.LOADING;
 import static com.example.matchdrawing.domain.game.game.entity.RoomStatus.WAITING;
 
 @Service
@@ -26,6 +29,7 @@ import static com.example.matchdrawing.domain.game.game.entity.RoomStatus.WAITIN
 public class DrawingService {
 
     private final DrawingRoomRepository drawingRoomRepository;
+    private final LoadingRoomRepository loadingRoomRepository;
     private final StompTemplate template;
     private final MemberService memberService;
 
@@ -140,5 +144,33 @@ public class DrawingService {
     public void changeRoomStatus(Long id, String status) {
         DrawingRoom room = findById(id);
         room.changeStatus(status);
+    }
+
+    @Transactional
+    public void createLoadingRoom(Long id) {
+        LoadingRoom loadingRoom = LoadingRoom.builder()
+                .room(findById(id))
+                .type(LOADING)
+                .build();
+        loadingRoomRepository.save(loadingRoom);
+    }
+
+    public boolean checkLoadingByRoomId(Long id) {
+        DrawingRoom room = findById(id);
+        LoadingRoom loading = loadingRoomRepository.findByRoom(room);
+        return loading.loadingComplete();
+    }
+
+
+    @Transactional
+    public boolean completeLoading(Long roomId, String username) {
+        DrawingRoom room = findById(roomId);
+        LoadingRoom loading = loadingRoomRepository.findByRoom(room);
+        Member member = memberService.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        if(room.getCurMember().contains(member)){
+            loading.addMember(member);
+            return true;
+        }
+        return false;
     }
 }
