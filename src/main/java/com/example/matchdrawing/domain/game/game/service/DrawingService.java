@@ -3,6 +3,7 @@ package com.example.matchdrawing.domain.game.game.service;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.entity.DrawingRoom;
 import com.example.matchdrawing.domain.game.game.entity.LoadingRoom;
+import com.example.matchdrawing.domain.game.game.entity.RoomStatus;
 import com.example.matchdrawing.domain.game.game.repository.DrawingRoomRepository;
 import com.example.matchdrawing.domain.game.game.repository.LoadingRoomRepository;
 import com.example.matchdrawing.domain.member.member.entity.Member;
@@ -136,8 +137,9 @@ public class DrawingService {
         return drawingRoomRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("잘못된 방입니다."));
     }
 
-    public boolean isWaiting(Long id) {
-        return findById(id).getType().equals(WAITING);
+    public boolean isNotLoading(Long id) {
+        RoomStatus status =  findById(id).getType();
+        return status != LOADING;
     }
 
     @Transactional
@@ -155,15 +157,14 @@ public class DrawingService {
         loadingRoomRepository.save(loadingRoom);
     }
 
-    public boolean checkLoadingByRoomId(Long id) {
-        DrawingRoom room = findById(id);
-        LoadingRoom loading = loadingRoomRepository.findByRoom(room);
+    public boolean checkLoadingByRoomId(Long roomId) {
+        LoadingRoom loading = loadingRoomRepository.findByRoomId(roomId);
         return loading.loadingComplete();
     }
 
 
     @Transactional
-    public boolean completeLoading(Long roomId, String username) {
+    public boolean enterGame(Long roomId, String username) {
         DrawingRoom room = findById(roomId);
         LoadingRoom loading = loadingRoomRepository.findByRoom(room);
         Member member = memberService.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -172,5 +173,14 @@ public class DrawingService {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public void deleteLoadingRoom(Long roomId) {
+        DrawingRoom dr = findById(roomId);
+        dr.changeStatus("PLAYING");
+
+        LoadingRoom lr = loadingRoomRepository.findByRoomId(roomId);
+        loadingRoomRepository.delete(lr);
     }
 }

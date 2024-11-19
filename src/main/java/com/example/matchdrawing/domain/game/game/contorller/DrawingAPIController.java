@@ -59,17 +59,21 @@ public class DrawingAPIController {
         if (check) {
             return ResponseEntity.ok(true);
         } else {
-            return ResponseEntity.ok(false);
+            return ResponseEntity.badRequest().body(false);
         }
     }
 
-    @PostMapping("/completeLoading")
-    public ResponseEntity<?> completeLoading(@RequestBody LoadingRoomDto dto){
-        boolean check = drawingService.completeLoading(dto.getRoomId(), dto.getUsername());
+    @PostMapping("/enterGame")
+    public ResponseEntity<?> enterGame(@RequestBody LoadingRoomDto dto){
+        boolean check = drawingService.enterGame(dto.getRoomId(), dto.getUsername());
         if(check){
             return ResponseEntity.ok(true);
         }
         return ResponseEntity.ok(false);
     }
 
+    @PostMapping("/completeLoading")
+    public void completeLoading(@RequestBody LoadingRoomDto dto){
+        drawingService.deleteLoadingRoom(dto.getRoomId());
+    }
 }

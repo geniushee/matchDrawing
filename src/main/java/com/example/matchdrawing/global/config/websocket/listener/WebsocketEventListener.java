@@ -34,8 +34,8 @@ public class WebsocketEventListener {
 
             Long id = Long.valueOf((String) headerAccessor.getSessionAttributes().get("roomId"));
 
-            // 대기실 상태에서 나갈경우에만
-            if (drawingService.isWaiting(id)) {
+            // 대기실 및 게임 중 상태에서 나갈경우에만
+            if (drawingService.isNotLoading(id)) {
                 if (drawingService.isOwner(id, member)) {
                     //방이 없어진다. sender를 break로 하여 break이 경우 모든 참가자들은 메세지와 함꼐 모두 로비로 이동.
                     String destination = "/room" + id;
