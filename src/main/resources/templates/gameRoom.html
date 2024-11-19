@@ -12,6 +12,12 @@
 </head>
 
 <body layout:fragment="content">
+    <article id="answer1" style="display: none; color: red;">
+        <div id="answer2" style=" font-weight: 800; font-size: xx-large;">
+        </div>
+        <div id="answer3" style=" font-weight: 800; font-size: large;">
+        </div>
+    </article>
     <main style="display: flex;">
         <section id="loading">
             Loading...
@@ -43,12 +49,12 @@
             <canvas id="canvas" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
             <section style="display: flex; flex-direction: column; margin: 5px">
                 <section id="playerList">
-                    <ul th:each= "mem, info :${roomDto.curMember}">
+                    <ul th:each="mem, info :${roomDto.curMember}">
                         <li>
                             <span th:text="${mem.username}"></span>
                         </li>
                     </ul>
-                    
+
                 </section>
                 <section id="msgBox">
                     <div>
@@ -57,8 +63,8 @@
                     <hr>
                 </section>
                 <hr>
-                <form th:action method="POST">
-                    <input id="send" name="send" type="text"> <button type="submit" onclick="postMsg(event);">보내기</button>
+                <form id="msgForm" th:action method="POST" onsubmit="postMsg(event); return false">
+                    <input id="send" name="send" type="text"> <button type="submit">보내기</button>
                 </form>
             </section>
         </section>
@@ -68,18 +74,13 @@
         import QueueList from "/js/QueueList.js"
 
         const username = /*[[${@rq.getUsername()}]]*/ 'noUser';
-        const roomInfo = /*[[${ roomDto }]]*/ {id:null};
+        const roomInfo = /*[[${ roomDto }]]*/ { id: null };
         const roomId = roomInfo.id;
 
         const answers = new QueueList();
         answers.enqueue("보자기")
         answers.enqueue("바위")
         answers.enqueue("가위")
-
-        for(var i = answers.size();i > 0; i--){
-            console.log(answers.dequeue())
-        }
-        console.log(answers.size());
 
         const socket_dr = new SockJS('http://localhost:8080/dr');
         const stompClient_dr = Stomp.over(socket_dr);
@@ -112,14 +113,16 @@
 
             async function isLoading() {
                 const url = "http://localhost:8080/api/game/isLoading?roomId=" + roomId;
-                try{
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    console.log(data);
-                    return data;
-                }catch{
+                const response = await fetch(url);
+
+                if (!response.ok) {
                     return false;
                 }
+
+                const data = await response.json();
+                console.log(data);
+                return data;
+
             }
 
             async function enterGame() {
@@ -142,18 +145,19 @@
                     loadingSection.style.display = "none";
                     mainSection.style.display = "flex"
 
-                    if(isOwner()){
+                    if (isOwner()) {
                         const url = "http://localhost:8080/api/game/completeLoading"
                         await fetch(url, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ roomId: roomId,
+                            body: JSON.stringify({
+                                roomId: roomId,
                                 username: username
                             })
                         })
                     }
                     clearInterval(interval) //반복 중단
-                }else{
+                } else {
                     console.log("loading....")
                 }
             }
@@ -194,6 +198,10 @@
                     alert(jsonData.msg);
                     // alert가 종료되면 자동으로 리디렉션
                     window.location.href = "http://localhost:8080/roby/list";
+                }
+
+                if (jsonData.msg.includes(answers.first())) {
+                    showAnswer(answers.dequeue());
                 }
 
                 let msgBox = document.getElementById('msgBox');
@@ -297,6 +305,13 @@
 
         });
 
+        document.addEventListener("DOMContentLoaded", function(){
+            const sendBt = document.getElementById("msgForm");
+            sendBt.addEventListener("submit", function(event){
+                postMsg(event);
+            })
+        })
+
         function postMsg(event) {
             event.preventDefault();
             let sendMsg = document.getElementById('send');
@@ -304,6 +319,23 @@
             stompClient_msg.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: msg }))
             console.log(msg);
             sendMsg.value = "";
+        }
+
+        function showAnswer(value) {
+            const answerTxt = document.getElementById("answer1");
+            const answerBit1 = document.getElementById("answer2");
+            const answerBit2 = document.getElementById("answer3");
+
+            answerBit1.innerHTML = `${username} 정답!`
+            answerBit2.innerHTML = `${value}`
+
+            answerTxt.style.display = "block";
+
+            setTimeout(function () {
+                answerTxt.style.display = "none";
+                answerBit1.innerHTML = "";
+                answerBit2.innerHTML = "";
+            }, 3000);
         }
 
     </script>

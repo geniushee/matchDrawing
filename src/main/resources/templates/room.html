@@ -18,8 +18,8 @@
         <hr>
     </section>
     <hr>
-    <form th:action method="POST">
-        <input id="send" name="send" type="text"> <button type="submit" onclick="postMsg(event);">보내기</button>
+    <form th:action method="POST" onsubmit="postMsg(event); return false">
+        <input id="send" name="send" type="text"> <button type="submit">보내기</button>
     </form>
     <section>
         <button th:if="${@rq.getUsername() == roomDto.owner.username}" onclick="startGame()">게임시작</button><span>

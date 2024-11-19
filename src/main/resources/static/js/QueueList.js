@@ -34,6 +34,13 @@ class QueueList {
         return temp;
     }
 
+    first(){
+        if(this._size === 0){
+            return null;
+        }
+        return this.head.value;
+    }
+
     size() {
         return this._size;
     }
