@@ -53,4 +53,4 @@ class Node {
     }
 }
 
-export default QueueList;
+window.QueueList = QueueList;

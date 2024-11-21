@@ -9,8 +9,8 @@ import com.example.matchdrawing.domain.game.game.repository.LoadingRoomRepositor
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
 import com.example.matchdrawing.global.config.websocket.dto.StompTemplate;
-import com.example.matchdrawing.global.dto.MessageDto;
-import com.example.matchdrawing.global.dto.SimpleMessageDto;
+import com.example.matchdrawing.global.config.websocket.dto.MessageDto;
+import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

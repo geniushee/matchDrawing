@@ -1,6 +1,6 @@
 package com.example.matchdrawing.domain.game;
 
-import com.example.matchdrawing.global.dto.SimpleMessageDto;
+import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,7 @@ package com.example.matchdrawing.global.config.websocket.listener;
 
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.domain.member.member.entity.Member;
-import com.example.matchdrawing.global.dto.SimpleMessageDto;
+import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;

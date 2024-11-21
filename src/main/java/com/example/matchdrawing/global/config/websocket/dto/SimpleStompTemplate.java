@@ -1,6 +1,5 @@
 package com.example.matchdrawing.global.config.websocket.dto;
 
-import com.example.matchdrawing.global.dto.MessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;

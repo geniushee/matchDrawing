@@ -35,6 +35,14 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setClientPasscode("admin");
     }
 
+    /**
+     * 통신간 최대 메세지 사이즈, 시간 설정등 할 수 있다. 기본사이즈는 64KB.
+     */
+//    @Override
+//    public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+//        registry.setMessageSizeLimit(64 * 1024);
+//    }
+
     @Bean
     public MessageConverter messageConverter(){
         return new Jackson2JsonMessageConverter();
