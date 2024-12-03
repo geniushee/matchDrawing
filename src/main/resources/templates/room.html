@@ -2,7 +2,8 @@
 
 <head>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <!--StompJs 버전 변경-->
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>
 </head>
 
 <body layout:fragment="content">
@@ -27,17 +28,22 @@
     </section>
 
     <script th:inline="javascript">
-        const user = [[${@rq.getUsername() }]]
-        let state = [[${ roomDto.status }]]
+        const user = /*[[${@rq.getUsername()}]]*/ 'noUser';
+        let state = /*[[${ roomDto.status }]]*/ null;
         console.log(user)
-        const roomId = [[${ roomDto.id }]];
-        let curParticipants = [[${ roomDto.numOfCurParticipants }]]
+        const roomId = /*[[${ roomDto.id }]]*/ null;
+        let curParticipants = /*[[${ roomDto.numOfCurParticipants }]]*/ 0;
 
         const socket = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
-        const stompClient = Stomp.over(socket);
+        // const stompClient = Stomp.over(socket);
+        const stompClient = new StompJs.Client({
+            webSocketFactory: () => socket,
+            debug: function (str){
+                console.log(str);
+            }
+        });
 
-
-        stompClient.connect({}, function (frame) {
+        stompClient.onConnect = function (frame) {
             console.log("Connected: " + frame)
             stompClient.subscribe(`/topic/room${roomId}`, function (data) {
                 // message data
@@ -69,7 +75,45 @@
                     msgBox.appendChild(msgBit);
                 }
             })
-        });
+        }
+
+        // StompJs 버전 변경으로 추가
+        stompClient.activate();
+
+        // StompJs 버전 변경으로 삭제
+        // stompClient.connect({}, function (frame) {
+        //     console.log("Connected: " + frame)
+        //     stompClient.subscribe(`/topic/room${roomId}`, function (data) {
+        //         // message data
+        //         let jsonData = JSON.parse(data.body)
+
+        //         if (jsonData.sender === "break") {
+        //             // 방장이 나갔다는 메세지 출력
+        //             alert(jsonData.msg);
+        //             // alert가 종료되면 자동으로 리디렉션
+        //             window.location.href = "http://localhost:8080/roby/list";
+        //         }
+
+        //         // 게임 시작 트리거
+        //         if (jsonData.sender === "start") {
+        //             var newUrl = jsonData.msg;
+        //             window.location.href = newUrl;
+        //         } else {
+        //             if (jsonData.sender === "system" && jsonData.msg.includes("참가")) {
+        //                 plusMember();
+        //             }
+
+        //             if (jsonData.sender === "system" && jsonData.msg.includes("퇴장")) {
+        //                 minusMember();
+        //             }
+
+        //             let msgBox = document.getElementById('msgBox');
+        //             let msgBit = document.createElement("div");
+        //             msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
+        //             msgBox.appendChild(msgBit);
+        //         }
+        //     })
+        // });
 
 
 
@@ -95,14 +139,14 @@
             const response = await fetch(url,
                 {
                     method: "POST",
-                    headers: {'Content-Type' : 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         id: roomId,
                         status: "LOADING"
                     })
                 }
             );
-            if (!response.ok){
+            if (!response.ok) {
                 exit();
             }
         }
@@ -115,11 +159,17 @@
         function startCountDown(seconds) {
             var interval = setInterval(function () {
                 if (seconds > 0) {
-                    stompClient.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: `${seconds} 후 게임이 시작합니다.` }))
+                    stompClient.publish({
+                        destination: `/app/room${roomId}`,
+                        body: JSON.stringify({ msg: `${seconds} 후 게임이 시작합니다.` })
+                    })
                     seconds--;
                 } else {
                     clearInterval(interval)
-                    stompClient.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: "Event:/startGame" }))
+                    stompClient.publish({
+                        destination: `/app/room${roomId}`,
+                        body: JSON.stringify({ msg: "Event:/startGame" }),
+                    })
                 }
             }, 1000);
         }
@@ -128,7 +178,10 @@
             event.preventDefault();
             let sendMsg = document.getElementById('send');
             let msg = sendMsg.value.trim();
-            stompClient.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: msg }))
+            stompClient.publish({
+                destination: `/app/room${roomId}`,
+                body: JSON.stringify({ msg: msg }),
+            })
             console.log(msg);
             sendMsg.value = "";
         }

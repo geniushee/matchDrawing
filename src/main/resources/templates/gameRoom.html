@@ -7,7 +7,8 @@
     <title>GameRoom</title>
     <script src="https://cdn.jsdelivr.net/npm/fabric@6.4.3/dist/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <!--stompJS 버전을 변경함-->
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>
     <script th:src="@{/js/QueueList.js}"></script>
 </head>
 
@@ -76,23 +77,7 @@
         const roomInfo = /*[[${ roomDto }]]*/ { id: null };
         const roomId = roomInfo.id;
 
-        const answers = new window.QueueList();
-        answers.enqueue("보자기")
-        answers.enqueue("바위")
-        answers.enqueue("가위")
-
-        const socket_dr = new SockJS('http://localhost:8080/dr');
-        const stompClient_dr = Stomp.over(socket_dr);
-        stompClient_dr.debug = (msg) => {
-            console.log('[STOMP dr_client Debug]:', msg)
-        }
-        const socket_msg = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
-        const stompClient_msg = Stomp.over(socket_msg);
-        stompClient_msg.debug = (msg) => {
-            console.log('[STOMP msg_client Debug]:', msg)
-        }
-
-        // 방장과 참여자를 나누어서 캔버스를 나누어 구현할 필요가 있음.
+        // 방장과 참여자를 구분하기 위한 메소드. 캔버스를 나누어 구현할 필요가 있음.
         function isOwner(_username) {
             if (_username === roomInfo.owner.username) {
                 return true;
@@ -144,19 +129,6 @@
                     loadingSection.style.display = "none";
                     mainSection.style.display = "flex"
 
-                    // if (isOwner(username)) {
-                    //     const url = "http://localhost:8080/api/game/completeLoading"
-                    //     setTimeout(
-                    //         await fetch(url, {
-                    //             method: "POST",
-                    //             headers: { "Content-Type": "application/json" },
-                    //             body: JSON.stringify({
-                    //                 roomId: roomId,
-                    //                 username: username
-                    //             })
-                    //         }), 5000)
-                    // }
-
                     clearInterval(interval) //반복 중단
                 } else {
                     console.log("loading....")
@@ -166,9 +138,36 @@
             var interval = setInterval(checkLoadingComplete, 1000)
         })
 
+        // 정답 큐 생성
+        const answers = new window.QueueList();
+        answers.enqueue("보자기")
+        answers.enqueue("바위")
+        answers.enqueue("가위")
 
-        // 캔버스 - 오너가 아닌 경우에만 서브스크라이브
-        stompClient_dr.connect({}, function (frame) {
+        // 캔버스 초기화
+        const canvas = new fabric.Canvas('canvas')
+        // 방장 여부에 따른 캔버스 구분
+        if (isOwner(username)) {
+            canvas.isDrawingMode = true;
+        }
+        console.log(canvas);
+
+        // websocket 및 stomp 연결부분
+        const socket_dr = new SockJS('http://localhost:8080/dr');
+
+        // stompJs 버전 변경
+        // const stompClient_dr = Stomp.over(socket_dr);
+
+        // stompJs 버전 변경 후
+        const stompClient_dr = new StompJs.Client({
+            webSocketFactory: () => socket_dr,
+            debug: function (str) {
+                console.log(str);
+            }
+        });
+
+        // stompClient onConnect 변경 - StompJs버전 변경 후
+        stompClient_dr.onConnect = function (frame) {
             // console.log("Connected: " + frame) debug 옵션을 사용하며 불필요해짐
             if (!isOwner(username)) {
                 stompClient_dr.subscribe(`/topic/drawing${roomId}`, function (data) {
@@ -192,10 +191,25 @@
                     }
                 })
             }
-        });
+        }
 
-        // 채팅
-        stompClient_msg.connect({}, function (frame) {
+        console.log(stompClient_dr);
+
+        // stompJS 버전 변경으로 삭제
+        // stompClient_dr.debug = (msg) => {
+        //     console.log('[STOMP dr_client Debug]:', msg)
+        // }
+
+        const socket_msg = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
+        const stompClient_msg = new StompJs.Client({
+            webSocketFactory: () => socket_msg,
+            debug: function (str) {
+                console.log(str);
+            }
+        }) // connectHeaders에 직접 로그인 정보를 입력할 수 있음. 차후 검토.
+
+        // stompClient onConnect 변경 - StompJs버전 변경 후
+        stompClient_msg.onConnect = function (frame) {
             // console.log("Connected: " + frame) debug 옵션을 사용하면서 불필요해짐
             stompClient_msg.subscribe(`/topic/room${roomId}`, function (data) {
                 let jsonData = JSON.parse(data.body)
@@ -218,7 +232,73 @@
                 msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
                 msgBox.appendChild(msgBit);
             })
-        });
+        }
+
+        //StompJs 버전 변경으로 추가
+        stompClient_dr.activate();
+        stompClient_msg.activate();
+
+
+        // stompJS 버전 변경으로 삭제
+        // const stompClient_msg = Stomp.over(socket_msg);
+        // stompClient_msg.debug = (msg) => {
+        //     console.log('[STOMP msg_client Debug]:', msg)
+        // }
+
+        // stompJs 버전 변경으로 삭제
+        // 캔버스 - 오너가 아닌 경우에만 서브스크라이브
+        // stompClient_dr.connect({}, function (frame) {
+        //     // console.log("Connected: " + frame) debug 옵션을 사용하며 불필요해짐
+        //     if (!isOwner(username)) {
+        //         stompClient_dr.subscribe(`/topic/drawing${roomId}`, function (data) {
+        //             let jsonData = JSON.parse(data.body)
+
+        //             // 클리어 메소드 동기화
+        //             if (typeof jsonData.msg === 'string' & jsonData.msg.includes("method")) {
+        //                 let methodName = jsonData.msg.split(":")[1];
+        //                 if (methodName === "clear") {
+        //                     canvas.clear()
+        //                 }
+        //             } else {
+        //                 console.log(`${jsonData.sender} : ${jsonData.msg}`)
+        //                 const data = JSON.parse(jsonData.msg);
+        //                 fabric.Path.fromObject(data)
+        //                     .then((path) => {
+        //                         console.log(path)
+        //                         canvas.add(path)
+        //                     })
+        //                 // canvas.loadFromJSON(jsonData.msg).then((canvas) => canvas.requstRenderAll())
+        //             }
+        //         })
+        //     }
+        // });
+
+        // StompJs 버전 변경으로 삭제
+        // 채팅
+        // stompClient_msg.connect({}, function (frame) {
+        //     // console.log("Connected: " + frame) debug 옵션을 사용하면서 불필요해짐
+        //     stompClient_msg.subscribe(`/topic/room${roomId}`, function (data) {
+        //         let jsonData = JSON.parse(data.body)
+
+        //         if (jsonData.sender === "break") {
+        //             // 방장이 나갔다는 메세지 출력
+        //             alert(jsonData.msg);
+        //             // alert가 종료되면 자동으로 리디렉션
+        //             window.location.href = "http://localhost:8080/roby/list";
+        //         }
+
+        //         if (!isOwner(jsonData.sender)) {
+        //             if (jsonData.msg.includes(answers.first())) {
+        //                 showAnswer(jsonData.sender, answers.dequeue());
+        //             }
+        //         }
+
+        //         let msgBox = document.getElementById('msgBox');
+        //         let msgBit = document.createElement("div");
+        //         msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
+        //         msgBox.appendChild(msgBit);
+        //     })
+        // });
 
         // 방장만 그리기 도구가 보이도록
         document.addEventListener('DOMContentLoaded', function () {
@@ -229,16 +309,6 @@
                 tools.style.display = 'none';
             }
         });
-
-
-
-        const canvas = new fabric.Canvas('canvas')
-        // 방장 여부에 따른 캔버스 구분
-        if (isOwner(username)) {
-            canvas.isDrawingMode = true;
-        }
-        console.log(canvas);
-
 
         // 캔버스 기능 시작
         var $ = function (id) { return document.getElementById(id); }
@@ -258,17 +328,31 @@
 
             // 그림이 그려질 때마다 데이터 생성 - 그림이 일정이상 그려지면 데이터의 크기가 Stomp에서 제한하는 크기 이상이 되어 연결이 끊김
             canvas.on("path:created", function (o) {
-                console.log(o.paht)
+                console.log(o.path)
+
+
                 // path를 데이터로 생성
-                const jsonData = JSON.stringify(o.path);
-                console.log("path:created :: ", jsonData);
+                const pathData = JSON.stringify(o.path);
+                console.log("path:created :: ", pathData);
+                if (isUnder64KB(pathData)) {
+                    // 그리기 공유, StompJs 버전 변경으로 수정
+                    stompClient_dr.publish({
+                        destination: `/app/drawing${roomId}`,
+                        body: JSON.stringify({ msg: pathData })
+                    })
+                } else {
+                    alert("조금 더 작게 그려주세요.");
+                    canvas.discardActiveObject();
+                    let sel = new fabric.ActiveSelection([JSON.parse(pathData)], {
+                        canvas: canvas,
+                    });
+                    sel.removeAll();
+                }
 
                 // 그림 데이터 json으로 생성
                 // var jsonData = JSON.stringify(canvas);
                 // console.log("JSON : " + jsonData)
 
-                // 그리기 공유
-                stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: jsonData }))
             })
 
 
@@ -300,8 +384,11 @@
             clear.onclick = function () {
                 canvas.clear();
 
-                // 그리기 공유
-                stompClient_dr.send(`/app/drawing${roomId}`, {}, JSON.stringify({ msg: "method:clear" }))
+                // 그리기 공유, StompJs 버전 변경으로 수정
+                stompClient_dr.publish({
+                    destination : `/app/drawing${roomId}`,
+                    body: JSON.stringify({ msg: "method:clear" })
+                })
             }
         } else {
             // 새로운 캔버스에 옮겨지면 재렌더링
@@ -327,7 +414,11 @@
             event.preventDefault();
             let sendMsg = document.getElementById('send');
             let msg = sendMsg.value.trim();
-            stompClient_msg.send(`/app/room${roomId}`, {}, JSON.stringify({ msg: msg }))
+            // StompJs 버전 변경으로 수정
+            stompClient_msg.publish({
+                destination : `/app/room${roomId}`,
+                body : JSON.stringify({ msg: msg })
+            })
             console.log(msg);
             sendMsg.value = "";
         }
@@ -361,6 +452,12 @@
             }
         }
 
+        function isUnder64KB(str) {
+            const encoder = new TextEncoder();
+            const length = encoder.encode(str).length;
+            console.log("length < 64 * 1024???", length < 64 * 1024, "length : ", length)
+            return length < 64 * 1024;
+        }
 
     </script>
 </body>
