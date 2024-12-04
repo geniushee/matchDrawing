@@ -1,8 +1,10 @@
 package com.example.matchdrawing.domain.game.game.contorller;
 
 import com.example.matchdrawing.domain.game.game.dto.ChangeRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.CountType;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.LoadingRoomDto;
+import com.example.matchdrawing.domain.game.game.service.AnswerService;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DrawingAPIController {
     private final DrawingService drawingService;
+    private final AnswerService answerService;
 
     @GetMapping("/list")
     public ResponseEntity<?> showRoomList() {
@@ -76,4 +79,14 @@ public class DrawingAPIController {
     public void completeLoading(@RequestBody LoadingRoomDto dto){
         drawingService.deleteLoadingRoom(dto.getRoomId());
     }
+
+
+    public record CountUpAnswerCounts(Long answerId, CountType type){}
+
+    @PostMapping("/countUp")
+    public void countUpAnswersCounts(@RequestBody CountUpAnswerCounts dto){
+        answerService.countUpAnswersCount(dto.answerId, dto.type);
+    }
+
+    //todo 정답을 맞출 경우 해당 이미지를 정답에 저장하고 돌려보기 시스템 구현
 }

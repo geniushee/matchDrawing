@@ -14,7 +14,7 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class SimpleWebsocketConfig implements WebSocketMessageBrokerConfigurer {
-
+    //todo 핸들러를 추가하여 split데이터를 받도록 하거나, 외부 브로커 사용하여 대용량 데이터(15kb이상) 사용필요
     private final CustomHandshakeHandler customHandshakeHandler;
     private final WebsocketHandshakeInterceptor msgHandshakeInterceptor;
     private final WebsocketDrawingHandshakeInterceptor drawingHandshakeInterceptor;

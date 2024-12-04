@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameRoom</title>
     <script src="https://cdn.jsdelivr.net/npm/fabric@6.4.3/dist/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <!--stompJS 버전을 변경함-->
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>
     <script th:src="@{/js/QueueList.js}"></script>
@@ -152,8 +152,9 @@
         }
         console.log(canvas);
 
+        SockJS.prototype.debug = true;
         // websocket 및 stomp 연결부분
-        const socket_dr = new SockJS('http://localhost:8080/dr');
+        const socket_dr = new SockJS('http://localhost:8080/dr',{},{});
 
         // stompJs 버전 변경
         // const stompClient_dr = Stomp.over(socket_dr);
@@ -330,11 +331,10 @@
             canvas.on("path:created", function (o) {
                 console.log(o.path)
 
-
                 // path를 데이터로 생성
                 const pathData = JSON.stringify(o.path);
                 console.log("path:created :: ", pathData);
-                if (isUnder64KB(pathData)) {
+                if (isUnderDataLimit(pathData)) {
                     // 그리기 공유, StompJs 버전 변경으로 수정
                     stompClient_dr.publish({
                         destination: `/app/drawing${roomId}`,
@@ -452,11 +452,11 @@
             }
         }
 
-        function isUnder64KB(str) {
+        function isUnderDataLimit(str) {
             const encoder = new TextEncoder();
             const length = encoder.encode(str).length;
-            console.log("length < 64 * 1024???", length < 64 * 1024, "length : ", length)
-            return length < 64 * 1024;
+            console.log("length < 64 * 1024???", length < 15 * 1024, "length : ", length)
+            return length < 15 * 1024;
         }
 
     </script>
