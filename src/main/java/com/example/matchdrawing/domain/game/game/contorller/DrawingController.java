@@ -32,11 +32,6 @@ public class DrawingController {
         return "roomList";
     }
 
-//    @GetMapping("/{id}")
-//    public String participateRoom(@PathVariable(name = "id")Long id, Model model){
-//        drawingService.getRoom()
-//    }
-
     @GetMapping("/create")
     public String showCreateRoomPage(){
         if(rq.isLogin()){

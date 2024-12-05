@@ -40,6 +40,6 @@ public class SimpleWebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
-        registry.setMessageSizeLimit(64 * 1024);
+        registry.setMessageSizeLimit(64 * 1024); // split데이터를 받지 못해 의미가 없음.
     }
 }

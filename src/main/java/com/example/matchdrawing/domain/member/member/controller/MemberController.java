@@ -45,7 +45,6 @@ public class MemberController {
 
             response.addCookie(cookie);
             return "home";
-//            return "redirect:/roby/list";
         }
 
         return "redirect:/roby";

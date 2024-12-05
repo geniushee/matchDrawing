@@ -14,7 +14,6 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
 
-
     @Transactional
     public Member register(String name, String password) {
         Member member = Member.builder()

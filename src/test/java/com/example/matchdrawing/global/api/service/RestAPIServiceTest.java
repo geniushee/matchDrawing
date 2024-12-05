@@ -11,6 +11,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * 외부 API요청 테스트
+ */
 @SpringBootTest
 public class RestAPIServiceTest {
 

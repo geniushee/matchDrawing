@@ -39,6 +39,7 @@ public class NotProd {
         };
     }
 
+    // 개발환경에서는 다수의 정답을 사전에 입력
     public void createAnswersFromTxtFile(String filePath){
         ClassPathResource resource = new ClassPathResource(filePath);
 

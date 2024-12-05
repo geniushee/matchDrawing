@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 
 /**
  * interceptor를 사용하고 싶다면 config에 등록을 해야한다.
+ * 채팅기능을 하는 웹소켓의 인터셉터.
+ * 인터셉터는 핸드쉐이크 할때 동작함.
+ * 그림판과는 분리하여 작성했으며 채팅기능에는 사용자정보를 포함하도록 함.
  */
 @Component
 @RequiredArgsConstructor
@@ -27,15 +30,21 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
     @Lazy
     private DrawingService drawingService;
 
+    /**
+     * 웹소켓에 사용자 정보를 주입하기 위한 핸드쉐이커
+     * @param request the current request
+     * @param response the current response
+     * @param wsHandler the target WebSocket handler
+     * @param attributes the attributes from the HTTP handshake to associate with the WebSocket
+     * session; the provided attributes are copied, the original map is not used.
+     * @return true
+     * @throws Exception 사용자가 로그인을 하지 않아 토큰이 없을 때.
+     */
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        System.out.println("핸드쉐이크 전처리");
-        System.out.println("사용자 정보 처리");
+        // 초기화
         Member member = null;
 
-        /* todo 소켓을 연결할때, 연결정보를 포함해야함. msg와 canvas를 별도로 연결하는데 disconnect에 대한 EventListener는 둘다 작동하므로 어떤 소켓의 연결이 끊겼는지에 대한 정보가 필요함.
-         ws에 대한 정보 - [payload={"msg":"hi","sender":"시험"}, headers={simpMessageType=MESSAGE, stompCommand=SEND, nativeHeaders={destination=[/app/drawing1]}, simpSessionId=11e8e564-0ec9-2dfb-3107-7ab9c9db437d, simpDestination=/app/drawing1}]
-         */
         // 사용자 정보 처리
         List<String> cookieheader = request.getHeaders().get("Cookie");
         String[] cookieString = new String[0];
@@ -43,9 +52,8 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
             cookieString = cookieheader.getFirst().split("; ");
         }
 
-        if (cookieString.length != 0) {
 
-            System.out.println("cookieString : " + Arrays.toString(cookieString));
+        if (cookieString.length != 0) {
             List<Cookie> cookies = Arrays.stream(cookieString).map(str -> {
                 String[] arr = str.split("=", 2);
                 return new Cookie(arr[0], arr[1]);
@@ -57,37 +65,34 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
             if (loginCookie != null) {
                 Optional<Member> opMember = memberService.findByUsername(loginCookie.getValue());
                 if (opMember.isPresent()) {
-                    System.out.println("사용자 정보 주입!");
                     member = opMember.get();
+                    // 사용자 정보 주입
                     attributes.put("user", member);
+                    // 채팅 웹소켓 표기
                     attributes.put("type", "msg");
                 }
             }
 
+            // 대기실 접속 처리, 쿼리로 게임방을 특정
+            String query = request.getURI().getQuery();
 
-        }
+            String[] querys = query.split("&");
+            Map<String, String> params = Arrays.stream(querys).map(q -> q.split("="))
+                    .collect(Collectors.toMap(
+                            pair -> pair[0],
+                            pair -> pair.length > 1 ? pair[1] : ""));
 
-        System.out.println("대기실 접속 처리");
-        // 대기실 접속 처리
-        String query = request.getURI().getQuery();
-        System.out.println("쿼리 확인"); //쿼리 확인
-        System.out.println(query); //roomId=3
-
-        String[] querys = query.split("&");
-        Map<String, String> params = Arrays.stream(querys).map(q -> q.split("="))
-                .collect(Collectors.toMap(
-                        pair -> pair[0],
-                        pair -> pair.length > 1 ? pair[1] : ""));
-
-        String roomId = params.get("roomId");
-        if (!roomId.isEmpty()) {
-            attributes.put("roomId", roomId);
-            if (member != null) {
-                drawingService.enterWaitingRoom(Long.valueOf(roomId), member);
-                System.out.println("한명 추가");
+            String roomId = params.get("roomId");
+            if (!roomId.isEmpty()) {
+                attributes.put("roomId", roomId);
+                if (member != null) {
+                    // 방정보에 사용자 추가
+                    drawingService.enterWaitingRoom(Long.valueOf(roomId), member);
+                }
             }
+        }else {
+            throw new RuntimeException("로그인이 필요합니다.");
         }
-
         return true;
     }
 

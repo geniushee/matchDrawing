@@ -10,6 +10,7 @@ public class AppConfig {
     @Getter
     private static String koreanDictKey;
 
+    //한국표준대국어사전 API키
     @Value(value = "${secret.KDictKey}")
     public void setKoreanDictKey(String key){
         this.koreanDictKey = key;

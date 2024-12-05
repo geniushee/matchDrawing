@@ -9,29 +9,27 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+/**
+ * 웹소켓 이벤트 리스터 Bean등록
+ * 웹소켓 연결 종료시 게임방에서 나가는 것을 처리.
+ */
 @Component
 @RequiredArgsConstructor
 public class WebsocketEventListener {
 
     private final DrawingService drawingService;
 
+    /**
+     * 연결종료 이벤트를 처리
+     * @param event 웹소켓 연결종료 시 발생하는 이벤트
+     */
     @EventListener
     public void handleWebsocketDisconnectListener(SessionDisconnectEvent event) {
-        System.out.println("이벤트 리스너 작동 확인");
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        System.out.println("도착지 확인 : " + headerAccessor);
         String type = (String) headerAccessor.getSessionAttributes().get("type");
-
 
         if (type.equals("msg")) {
             Member member = (Member) headerAccessor.getSessionAttributes().get("user");
-            System.out.printf("""
-                    멤버 확인
-                    id : %d
-                    이름 : %s
-                    %n""", member.getId(), member.getUsername());
-
-
             Long id = Long.valueOf((String) headerAccessor.getSessionAttributes().get("roomId"));
 
             // 대기실 및 게임 중 상태에서 나갈경우에만
@@ -57,9 +55,7 @@ public class WebsocketEventListener {
                 }
             }
         } else if (type.equals("dr")) {
-            System.out.printf("""
-                    그림판은 disconnect 제외
-                    """);
+            //그림판의 연결종료는 해당 이벤트가 발생하지 않도록 함.
         }
     }
 }

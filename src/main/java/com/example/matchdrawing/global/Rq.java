@@ -10,6 +10,9 @@ import org.springframework.web.context.annotation.RequestScope;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * RequestScope에서 사용자 정보를 캐싱하기 위한 클래스
+ */
 @RequestScope
 @Component
 @RequiredArgsConstructor

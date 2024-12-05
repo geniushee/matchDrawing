@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * interceptor를 사용하고 싶다면 config에 등록을 해야한다.
+ * 그림판과 통신하는 웹소켓 인터셉터. 웹소켓 연결종료 이벤트를 사용한 이벤트 처리메소드가 있어. 채팅기능과 분리를 위해 attribute 작성.
  */
 @Component
 @RequiredArgsConstructor

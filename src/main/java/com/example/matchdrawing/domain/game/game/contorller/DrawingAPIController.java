@@ -85,12 +85,5 @@ public class DrawingAPIController {
         answerService.countUpAnswersCount(dto.answerId, dto.type);
     }
 
-    // 방장만 API호출로 데이터를 받아서 전체에게 공유가 되지 않음. 각자 받을경우 Random때문에 답이 각각 다름.
-//    @GetMapping("/answerSet")
-//    public ResponseEntity<?> getAnswerSet(@RequestParam(name = "count", defaultValue = "5")int count){
-//        List<AnswerDto> list = answerService.createAnswerList(count);
-//        return ResponseEntity.ok(list);
-//    }
-
     //todo 정답을 맞출 경우 해당 이미지를 정답에 저장하고 돌려보기 시스템 구현
 }
