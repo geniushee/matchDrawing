@@ -44,6 +44,20 @@ class QueueList {
     size() {
         return this._size;
     }
+
+    get(index){
+        if(index >= size){
+            throw new Error();
+        }
+        if(index === 0){
+            return this.first();
+        }
+        let node = this.head;
+        for(let i = 1; i <= index; i++){
+            node = node.next;
+        }
+        return node.value;
+    }
 }
 
 class Node {

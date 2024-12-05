@@ -1,6 +1,7 @@
 package com.example.matchdrawing.domain.game.game.service;
 
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
+import com.example.matchdrawing.domain.game.game.entity.Answer;
 import com.example.matchdrawing.domain.game.game.entity.DrawingRoom;
 import com.example.matchdrawing.domain.game.game.entity.LoadingRoom;
 import com.example.matchdrawing.domain.game.game.entity.RoomStatus;
@@ -8,9 +9,9 @@ import com.example.matchdrawing.domain.game.game.repository.DrawingRoomRepositor
 import com.example.matchdrawing.domain.game.game.repository.LoadingRoomRepository;
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
-import com.example.matchdrawing.global.config.websocket.dto.StompTemplate;
 import com.example.matchdrawing.global.config.websocket.dto.MessageDto;
 import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
+import com.example.matchdrawing.global.config.websocket.dto.StompTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,16 +34,19 @@ public class DrawingService {
     private final LoadingRoomRepository loadingRoomRepository;
     private final StompTemplate template;
     private final MemberService memberService;
+    private final AnswerService answerService;
 
 
     @Transactional
-    public DrawingRoomDto createRoom(String username, String roomName, int numOfParticipant) {
+    public DrawingRoomDto createRoom(String username, String roomName, int numOfParticipant, int countOfAnswers) {
         Member user = memberService.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        List<Answer> answers = answerService.createAnswerList(countOfAnswers);
         DrawingRoom room = DrawingRoom.builder()
                 .type(WAITING)
                 .roomName(roomName)
                 .owner(user)
                 .numOfParticipants(numOfParticipant)
+                .answers(answers)
                 .build();
 
         room = drawingRoomRepository.save(room);

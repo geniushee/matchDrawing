@@ -22,6 +22,7 @@ public class DrawingRoomDto {
     private List<MemberDto> curMember;
     private int numOfParticipants;
     private int numOfCurParticipants;
+    private List<AnswerDto> answers;
 
     public DrawingRoomDto(DrawingRoom entity){
         this.id = entity.getId();
@@ -32,6 +33,8 @@ public class DrawingRoomDto {
         this.owner = new MemberDto(entity.getOwner());
         this.curMember = entity.getCurMember().stream()
                 .map(MemberDto::new).toList();
+        this.answers = entity.getAnswers().stream()
+                .map(AnswerDto::new).toList();
         this.numOfParticipants = entity.getNumOfParticipants();
         this.numOfCurParticipants = entity.getCurMember().size();
     }

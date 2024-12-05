@@ -28,6 +28,8 @@ public class DrawingRoom extends TimeEntity implements Room {
     @JoinColumn(name = "drawing_room_id")
     @Builder.Default
     private List<Member> curMember = new ArrayList<>();
+    @OneToMany
+    private List<Answer> answers = new ArrayList<>();
 
     public boolean isMax(){
         return curMember.size() >= numOfParticipants;

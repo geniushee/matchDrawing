@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -30,8 +33,16 @@ public class AnswerService {
         answerRepository.save(newAnswer);
     }
 
-    public void createAnswerList() {
-        //todo 문항수에 따른 List<answerDto(id, string)>를 반환
+    public List<Answer> createAnswerList(int count) {
+        Long totalCount = countAnswer();
+        Long id;
+        List<Answer> list = new ArrayList<>();
+        for(int i = 0; i < count; i++){
+            id = Double.valueOf(Math.floor(Math.random() * totalCount)).longValue() + 1L;
+            Answer item = findById(id);
+            if(!list.contains(item))list.add(item); // 랜덤을 해도 같은게 나올 수 있다...
+        }
+        return list;
     }
 
     @Transactional

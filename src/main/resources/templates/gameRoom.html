@@ -24,6 +24,9 @@
             Loading...
         </section>
         <section id="main" style="display: none;">
+            <section id="questionSet" style="font-size: 3rem; font-weight: bold; display: block;">
+                <span>문제 : </span><span id="question"></span>
+            </section>
             <!-- 그리는 사람 제외 비활성화 필요 -->
             <section id="tools" style="border : 1px solid; padding: 5px; max-width: 20%">
                 <div style="margin-left: 5px; margin-bottom: 10px;">
@@ -77,14 +80,6 @@
         const roomInfo = /*[[${ roomDto }]]*/ { id: null };
         const roomId = roomInfo.id;
 
-        // 방장과 참여자를 구분하기 위한 메소드. 캔버스를 나누어 구현할 필요가 있음.
-        function isOwner(_username) {
-            if (_username === roomInfo.owner.username) {
-                return true;
-            }
-            return false;
-        }
-
         // 로딩 구현
         document.addEventListener("DOMContentLoaded", function () {
             const loadingSection = document.getElementById("loading")
@@ -94,6 +89,8 @@
             loadingSection.style.display = "block";
             mainSection.style.display = "none"
             enterGame()
+
+            var interval = setInterval(checkLoadingComplete, 1000)
 
             async function isLoading() {
                 const url = "http://localhost:8080/api/game/isLoading?roomId=" + roomId;
@@ -106,7 +103,6 @@
                 const data = await response.json();
                 console.log(data);
                 return data;
-
             }
 
             async function enterGame() {
@@ -129,20 +125,33 @@
                     loadingSection.style.display = "none";
                     mainSection.style.display = "flex"
 
+                    setAnswerList();
                     clearInterval(interval) //반복 중단
                 } else {
                     console.log("loading....")
                 }
             }
 
-            var interval = setInterval(checkLoadingComplete, 1000)
+            async function setAnswerList() {
+                let data = roomInfo.answers;
+                for (let i = 0; i < data.length; i++) {
+                    answers.enqueue(data[i])
+                }
+                console.log(answers);
+                setQuestion(answers.first().answer)
+                if(isOwner(username)){
+                    countUpAnswer(answers.first().answerId, "QUESTION")
+                }
+            }
         })
 
         // 정답 큐 생성
         const answers = new window.QueueList();
-        answers.enqueue("보자기")
-        answers.enqueue("바위")
-        answers.enqueue("가위")
+        // 문제는 방장만 보이도록 세팅
+        if(!isOwner(username)){
+            let questionSet = document.getElementById("questionSet");
+            questionSet.style.display = "none"
+        }
 
         // 캔버스 초기화
         const canvas = new fabric.Canvas('canvas')
@@ -154,7 +163,7 @@
 
         SockJS.prototype.debug = true;
         // websocket 및 stomp 연결부분
-        const socket_dr = new SockJS('http://localhost:8080/dr',{},{});
+        const socket_dr = new SockJS('http://localhost:8080/dr', {}, {});
 
         // stompJs 버전 변경
         // const stompClient_dr = Stomp.over(socket_dr);
@@ -223,8 +232,26 @@
                 }
 
                 if (!isOwner(jsonData.sender)) {
-                    if (jsonData.msg.includes(answers.first())) {
+                    if (jsonData.msg.includes(answers.first().answer)) {
                         showAnswer(jsonData.sender, answers.dequeue());
+                        if(answers.size() !== 0){
+                            setQuestion(answers.first().answer)
+                        }else{
+                            setQuestion("")
+                            let winnerUsername;
+                            let maxScore = -1;
+                            for(let i =0;i<roomInfo.curMember.length;i++){
+                                let score = scoreMap.get(roomInfo.curMember[i].username)
+                                if(score > maxScore){
+                                    winnerUsername = roomInfo.curMember[i].username;
+                                    maxScore = score;
+                                }
+                            }
+                            alert(`문제를 모두 풀었습니다.
+                            가장 높은 점수는 ${maxScore}로 ${winnerUsername}가 1등입니다.
+                            로비로 이동합니다.`)
+                            window.location.href = "http://localhost:8080/roby/list";
+                        }
                     }
                 }
 
@@ -386,7 +413,7 @@
 
                 // 그리기 공유, StompJs 버전 변경으로 수정
                 stompClient_dr.publish({
-                    destination : `/app/drawing${roomId}`,
+                    destination: `/app/drawing${roomId}`,
                     body: JSON.stringify({ msg: "method:clear" })
                 })
             }
@@ -410,26 +437,38 @@
             })
         })
 
+        // 방장과 참여자를 구분하기 위한 메소드. 캔버스를 나누어 구현할 필요가 있음.
+        function isOwner(_username) {
+            if (_username === roomInfo.owner.username) {
+                return true;
+            }
+            return false;
+        }
+
         function postMsg(event) {
             event.preventDefault();
             let sendMsg = document.getElementById('send');
             let msg = sendMsg.value.trim();
             // StompJs 버전 변경으로 수정
             stompClient_msg.publish({
-                destination : `/app/room${roomId}`,
-                body : JSON.stringify({ msg: msg })
+                destination: `/app/room${roomId}`,
+                body: JSON.stringify({ msg: msg })
             })
             console.log(msg);
             sendMsg.value = "";
         }
 
-        function showAnswer(_username, _value) {
+        function showAnswer(_username, _answer) {
+            if(isOwner(username)){
+                countUpAnswer(_answer.answerId, "CORRECT")
+            }
+
             const answerTxt = document.getElementById("answer1");
             const answerBit1 = document.getElementById("answer2");
             const answerBit2 = document.getElementById("answer3");
 
             answerBit1.innerHTML = `${_username} 정답!`
-            answerBit2.innerHTML = `${_value}`
+            answerBit2.innerHTML = `${_answer.answer}`
 
             scoreMap.set(_username, scoreMap.get(_username) + 1);
             const scoreLabel = document.getElementById(`${_username}_score`)
@@ -442,6 +481,20 @@
                 answerBit1.innerHTML = "";
                 answerBit2.innerHTML = "";
             }, 3000);
+        }
+
+        async function countUpAnswer(id, type) {
+            const url = "http://localhost:8080/api/game/countUp";
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    answerId: id,
+                    type: type,
+                })
+            })
         }
 
         //점수판
@@ -457,6 +510,11 @@
             const length = encoder.encode(str).length;
             console.log("length < 64 * 1024???", length < 15 * 1024, "length : ", length)
             return length < 15 * 1024;
+        }
+
+        function setQuestion(question) {
+            const questionTag = document.getElementById("question");
+            questionTag.innerHTML = question;
         }
 
     </script>

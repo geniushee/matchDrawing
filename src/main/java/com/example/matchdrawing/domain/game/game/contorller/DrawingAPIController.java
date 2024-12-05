@@ -1,9 +1,6 @@
 package com.example.matchdrawing.domain.game.game.contorller;
 
-import com.example.matchdrawing.domain.game.game.dto.ChangeRoomDto;
-import com.example.matchdrawing.domain.game.game.dto.CountType;
-import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
-import com.example.matchdrawing.domain.game.game.dto.LoadingRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.*;
 import com.example.matchdrawing.domain.game.game.service.AnswerService;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +59,7 @@ public class DrawingAPIController {
         if (check) {
             return ResponseEntity.ok(true);
         } else {
-            return ResponseEntity.badRequest().body(false);
+            return ResponseEntity.ok().body(false);
         }
     }
 
@@ -87,6 +84,13 @@ public class DrawingAPIController {
     public void countUpAnswersCounts(@RequestBody CountUpAnswerCounts dto){
         answerService.countUpAnswersCount(dto.answerId, dto.type);
     }
+
+    // 방장만 API호출로 데이터를 받아서 전체에게 공유가 되지 않음. 각자 받을경우 Random때문에 답이 각각 다름.
+//    @GetMapping("/answerSet")
+//    public ResponseEntity<?> getAnswerSet(@RequestParam(name = "count", defaultValue = "5")int count){
+//        List<AnswerDto> list = answerService.createAnswerList(count);
+//        return ResponseEntity.ok(list);
+//    }
 
     //todo 정답을 맞출 경우 해당 이미지를 정답에 저장하고 돌려보기 시스템 구현
 }

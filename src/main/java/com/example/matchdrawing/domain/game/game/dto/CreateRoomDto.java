@@ -6,4 +6,5 @@ import lombok.Data;
 public class CreateRoomDto {
     private String roomName;
     private int numOfParticipants;
+    private int countOfAnswers;
 }
