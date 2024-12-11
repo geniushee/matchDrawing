@@ -81,7 +81,8 @@ public class DrawingControllerTest {
                 new MemberDto("user1"),
                 new ArrayList<>(),
                 p,
-                0);
+                0,
+                new ArrayList<>());
     }
 
     private SimpleMessageDto createMSGDto(String msg, String sender) {
@@ -120,17 +121,19 @@ public class DrawingControllerTest {
     void createRoom() throws Exception {
         String roomName = "room1";
         int p = 3;
+        int answers = 5;
 
         DrawingRoomDto roomDto = createRoomDto(roomName, p);
 
         when(rq.getUsername())
                 .thenReturn("user1");
-        when(drawingService.createRoom(rq.getUsername(), "room1", 3))
+        when(drawingService.createRoom(rq.getUsername(), "room1", 3, answers))
                 .thenReturn(roomDto);
 
         mockMvc.perform(post("/roby/create")
                         .param("roomName", roomName)
-                        .param("numOfParticipants", String.valueOf(p)))
+                        .param("numOfParticipants", String.valueOf(p))
+                        .param("countOfAnswers", String.valueOf(answers)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/roby/room/" + roomDto.getId()));
     }

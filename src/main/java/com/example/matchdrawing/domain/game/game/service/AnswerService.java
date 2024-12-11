@@ -17,18 +17,32 @@ import java.util.List;
 public class AnswerService {
     private final AnswerRepository answerRepository;
 
+    private Long totalAnswersCount = null;
+
+    private void setTotalAnswersCount(){
+        totalAnswersCount = answerRepository.count();
+    }
+    public Long getTotalAnswersCount(){
+        if(totalAnswersCount != null){
+            return totalAnswersCount;
+        }else {
+            setTotalAnswersCount();
+        }
+        return totalAnswersCount;
+    }
+
     @Transactional
     public void addNewAnswer(String answer){
         Answer newAnswer = new Answer(answer);
         answerRepository.save(newAnswer);
+        totalAnswersCount = null;
     }
 
     public List<Answer> createAnswerList(int count) {
-        Long totalCount = countAnswer();
         Long id;
         List<Answer> list = new ArrayList<>();
         for(int i = 0; i < count; i++){
-            id = Double.valueOf(Math.floor(Math.random() * totalCount)).longValue() + 1L;
+            id = Double.valueOf(Math.floor(Math.random() * totalAnswersCount)).longValue() + 1L;
             Answer item = findById(id);
             if(!list.contains(item))list.add(item); // 랜덤을 해도 같은게 나올 수 있다...
         }
@@ -47,9 +61,5 @@ public class AnswerService {
 
     private Answer findById(Long id) {
         return answerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("찾는 정답이 없습니다."));
-    }
-
-    public Long countAnswer() {
-        return answerRepository.count();
     }
 }

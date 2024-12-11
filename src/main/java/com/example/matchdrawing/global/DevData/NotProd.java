@@ -33,7 +33,7 @@ public class NotProd {
                 Member member3 = memberService.register("user3", "1234");
             }
 
-            if(answerService.countAnswer() < 3){
+            if(answerService.getTotalAnswersCount() < 3){
                 createAnswersFromTxtFile("static/txt/basic_answers_animal.txt");
             }
         };

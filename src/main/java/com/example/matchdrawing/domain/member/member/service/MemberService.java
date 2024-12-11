@@ -2,10 +2,14 @@ package com.example.matchdrawing.domain.member.member.service;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.repository.MemberRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -39,5 +43,17 @@ public class MemberService {
 
     public Long countMembers() {
         return memberRepository.count();
+    }
+
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie loginCookie = Arrays.stream(request.getCookies())
+                .filter(cookie -> cookie.getName().equals("login"))
+                .findFirst().orElse(new Cookie("login", null));
+
+
+        loginCookie.setMaxAge(0);
+        loginCookie.setPath("/");
+        loginCookie.setValue(null);
+        response.addCookie(loginCookie);
     }
 }

@@ -1,19 +1,16 @@
 <html layout:decorate="~{global/layout}">
 
 <body layout:fragment="content">
-
-
-    <main>
-        <section>
-            <article>
-                방 리스트
-                <div>
-                    <a th:href="@{/roby/create}">방만들기</a>
-                    <button onclick="location.reload();"> 목록 새로고침</button>
-                </div>
-            </article>
+    <main class="container mt-5">
+        <section class="row">
+            <div class="col-6">게임방 목록
+            </div>
+            <div class="col-6">
+                <a class="btn btn-primary mx-2" th:href="@{/roby/create}">방만들기</a>
+                <button class="btn btn-secondary mx-2" onclick="location.reload();"> 목록 새로고침</button>
+            </div>
         </section>
-        <section>
+        <section class="row">
             <ul id="roomList">
                 <!-- <li>
                     <div >
@@ -31,9 +28,12 @@
                 </li> -->
             </ul>
         </section>
+        <section class="row">
+
+        </section>
     </main>
     <script>
-        
+
         getRoomList()
         refreshPage(5)
 
@@ -44,49 +44,49 @@
             }, intervalInSeconds * 1000);
         }
 
-        async function getRoomList(){
-            const url ="http://localhost:8080/api/game/list"
+        async function getRoomList() {
+            const url = "http://localhost:8080/api/game/list"
             let response = await fetch(url)
-            
+
             console.log(response)
 
-            if(!response.ok){
+            if (!response.ok) {
                 throw new Error("Network response was not ok")
             }
-            
-            try{
+
+            try {
                 //json 데이터로 변환
                 const data = await response.json();
                 console.log(data)
-    
+
                 const contents = data.content; //array
-    
+
                 const listTag = document.getElementById("roomList");
                 listTag.innerHTML = "";
-    
+
                 // 페이지에 추가
-                for(let i = 0; i < contents.length; i++){
+                for (let i = 0; i < contents.length; i++) {
                     let content = contents[i];
                     let li = document.createElement("li");
                     let article = document.createElement("article")
-                    
+
                     let roomNameTag = document.createElement("div")
                     roomNameTag.innerHTML = `방이름 : ${content.roomName}`
                     article.appendChild(roomNameTag);
-    
+
                     let participantsTag = document.createElement("div")
                     participantsTag.innerHTML = `현재 참여자 : ${content.numOfCurParticipants} / 최대 참여자 : ${content.numOfParticipants}`
                     article.appendChild(participantsTag);
-    
+
                     let aTag = document.createElement("a")
                     aTag.innerHTML = "참여하기"
                     aTag.href = `/roby/room/${content.id}`;
                     article.appendChild(aTag);
-    
+
                     li.appendChild(article);
                     listTag.appendChild(li)
                 }
-            }catch{
+            } catch {
 
             }
         }

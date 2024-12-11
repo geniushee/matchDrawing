@@ -3,13 +3,11 @@ package com.example.matchdrawing.domain.member.member.controller;
 import com.example.matchdrawing.domain.member.member.dto.MemberSignInDto;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/member")
@@ -44,9 +42,16 @@ public class MemberController {
             cookie.setHttpOnly(true);
 
             response.addCookie(cookie);
-            return "home";
+            return "redirect:/roby";
         }
 
         return "redirect:/roby";
     }
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request,
+                         HttpServletResponse response){
+        memberService.logout(request, response);
+        return "redirect:/roby";
+    }
+
 }

@@ -1,19 +1,37 @@
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html layout:decorate="~{global/layout}" xmlns:th="http://www.w3.org/1999/xhtml">
 
-<body>
-    <section>
-        <span>회원가입 페이지</span>
-    </section>
-    <form th:action method="POST">
-        <label for="memberName">아이디</label>
-        <input type="text" id="memberName" placeholder="아이디를 입력하세요." name="name">
-        <label for="memberPsw">비밀번호</label>
-        <input type="password" id="memberPsw" placeholder="비밀번호를 입력하세요." name="password">
-        <div>
-            <button type="submit">SignIn</button>
-            <button type="button" onclick="goBack(); return false;">뒤로가기</button>
-        </div>
-    </form>
+<head>
+    <title>
+        회원가입
+    </title>
+</head>
+
+<body layout:fragment="content">
+    <div class="container">
+        <section class="mt-5 d-flex flex-column align-items-center">
+            <p class="fs-2 fw-medium">Sign Up</p>
+            <form th:action method="POST"
+            class="border rounded p-5 d-flex flex-column justify-between align-items-center shadow bg-body-tertiary "
+            style="width: 350px; height: 500px;">
+                <div class="mb-5">
+                    <label class="form-label" for="memberName">아이디</label>
+                    <input class="form-control" type="text" id="memberName" placeholder="아이디를 입력하세요." name="name"
+                    aria-describedby="nameHelp">
+                    <div class="form-text" id="nameHelp">영문/숫자만 입력해주세요.</div>
+                </div>
+                <div class="mb-5">
+                    <label class="form-label" for="memberPsw">비밀번호</label>
+                    <input class="form-control" type="password" id="memberPsw" placeholder="비밀번호를 입력하세요." name="password"
+                    aria-describedby="passwordHelp">
+                    <div class="form-text" id="passwordHelp">영문/숫자만 입력해주세요.</div>
+                </div>
+                <div class="mb-3">
+                    <button class="btn btn-primary mx-2" type="submit">SignIn</button>
+                    <button class="btn btn-secondary mx-2" type="button" onclick="goBack(); return false;">뒤로가기</button>
+                </div>
+            </form>
+        </section>
+    </div>
 
     <script>
         function goBack() {

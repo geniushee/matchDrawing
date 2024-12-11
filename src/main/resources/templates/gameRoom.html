@@ -266,67 +266,10 @@
         stompClient_dr.activate();
         stompClient_msg.activate();
 
-
-        // stompJS 버전 변경으로 삭제
-        // const stompClient_msg = Stomp.over(socket_msg);
-        // stompClient_msg.debug = (msg) => {
-        //     console.log('[STOMP msg_client Debug]:', msg)
-        // }
-
-        // stompJs 버전 변경으로 삭제
-        // 캔버스 - 오너가 아닌 경우에만 서브스크라이브
-        // stompClient_dr.connect({}, function (frame) {
-        //     // console.log("Connected: " + frame) debug 옵션을 사용하며 불필요해짐
-        //     if (!isOwner(username)) {
-        //         stompClient_dr.subscribe(`/topic/drawing${roomId}`, function (data) {
-        //             let jsonData = JSON.parse(data.body)
-
-        //             // 클리어 메소드 동기화
-        //             if (typeof jsonData.msg === 'string' & jsonData.msg.includes("method")) {
-        //                 let methodName = jsonData.msg.split(":")[1];
-        //                 if (methodName === "clear") {
-        //                     canvas.clear()
-        //                 }
-        //             } else {
-        //                 console.log(`${jsonData.sender} : ${jsonData.msg}`)
-        //                 const data = JSON.parse(jsonData.msg);
-        //                 fabric.Path.fromObject(data)
-        //                     .then((path) => {
-        //                         console.log(path)
-        //                         canvas.add(path)
-        //                     })
-        //                 // canvas.loadFromJSON(jsonData.msg).then((canvas) => canvas.requstRenderAll())
-        //             }
-        //         })
-        //     }
-        // });
-
-        // StompJs 버전 변경으로 삭제
-        // 채팅
-        // stompClient_msg.connect({}, function (frame) {
-        //     // console.log("Connected: " + frame) debug 옵션을 사용하면서 불필요해짐
-        //     stompClient_msg.subscribe(`/topic/room${roomId}`, function (data) {
-        //         let jsonData = JSON.parse(data.body)
-
-        //         if (jsonData.sender === "break") {
-        //             // 방장이 나갔다는 메세지 출력
-        //             alert(jsonData.msg);
-        //             // alert가 종료되면 자동으로 리디렉션
-        //             window.location.href = "http://localhost:8080/roby/list";
-        //         }
-
-        //         if (!isOwner(jsonData.sender)) {
-        //             if (jsonData.msg.includes(answers.first())) {
-        //                 showAnswer(jsonData.sender, answers.dequeue());
-        //             }
-        //         }
-
-        //         let msgBox = document.getElementById('msgBox');
-        //         let msgBit = document.createElement("div");
-        //         msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
-        //         msgBox.appendChild(msgBit);
-        //     })
-        // });
+        // 페이지 이동 및 윈도우 닫을 시 disconnect
+        window.addEventListener('beforeunload', function (event) {
+            stompClient.deactivate();
+        })
 
         // 방장만 그리기 도구가 보이도록
         document.addEventListener('DOMContentLoaded', function () {

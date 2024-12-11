@@ -34,6 +34,10 @@
         const roomId = /*[[${ roomDto.id }]]*/ null;
         let curParticipants = /*[[${ roomDto.numOfCurParticipants }]]*/ 0;
 
+        if(state === "PLAYING"){
+            window.location.href = `http://localhost:8080/roby/game/${roomId}`;
+        }
+
         const socket = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
         // const stompClient = Stomp.over(socket);
         const stompClient = new StompJs.Client({
@@ -80,47 +84,8 @@
         // StompJs 버전 변경으로 추가
         stompClient.activate();
 
-        // StompJs 버전 변경으로 삭제
-        // stompClient.connect({}, function (frame) {
-        //     console.log("Connected: " + frame)
-        //     stompClient.subscribe(`/topic/room${roomId}`, function (data) {
-        //         // message data
-        //         let jsonData = JSON.parse(data.body)
-
-        //         if (jsonData.sender === "break") {
-        //             // 방장이 나갔다는 메세지 출력
-        //             alert(jsonData.msg);
-        //             // alert가 종료되면 자동으로 리디렉션
-        //             window.location.href = "http://localhost:8080/roby/list";
-        //         }
-
-        //         // 게임 시작 트리거
-        //         if (jsonData.sender === "start") {
-        //             var newUrl = jsonData.msg;
-        //             window.location.href = newUrl;
-        //         } else {
-        //             if (jsonData.sender === "system" && jsonData.msg.includes("참가")) {
-        //                 plusMember();
-        //             }
-
-        //             if (jsonData.sender === "system" && jsonData.msg.includes("퇴장")) {
-        //                 minusMember();
-        //             }
-
-        //             let msgBox = document.getElementById('msgBox');
-        //             let msgBit = document.createElement("div");
-        //             msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
-        //             msgBox.appendChild(msgBit);
-        //         }
-        //     })
-        // });
-
-
-
         window.addEventListener('beforeunload', function (event) {
-            stompClient.disconnect(() => {
-                console.log("disconnect ws")
-            });
+            stompClient.deactivate();
         })
 
         function plusMember() {
