@@ -17,7 +17,7 @@ import java.util.List;
 public class AnswerService {
     private final AnswerRepository answerRepository;
 
-    private Long totalAnswersCount = null;
+    private Long totalAnswersCount = null; //use getMethod.
 
     private void setTotalAnswersCount(){
         totalAnswersCount = answerRepository.count();
@@ -42,7 +42,7 @@ public class AnswerService {
         Long id;
         List<Answer> list = new ArrayList<>();
         for(int i = 0; i < count; i++){
-            id = Double.valueOf(Math.floor(Math.random() * totalAnswersCount)).longValue() + 1L;
+            id = Double.valueOf(Math.floor(Math.random() * getTotalAnswersCount())).longValue() + 1L;
             Answer item = findById(id);
             if(!list.contains(item))list.add(item); // 랜덤을 해도 같은게 나올 수 있다...
         }

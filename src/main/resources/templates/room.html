@@ -7,42 +7,64 @@
 </head>
 
 <body layout:fragment="content">
-    <article>
-        <div>방이름 : <span th:text="${roomDto.roomName}"></span></div>
-        <div>인원 수(현재/최대) : <span id="curParticipants"></span>/<span th:text="${roomDto.numOfParticipants}"></span></div>
-    </article>
-    <hr>
-    <section id="msgBox">
-        <div>
-            채팅창
+    <div class="container mt-5 vh-80">
+        <div class="row">
+            <div class="col" id="roomInfo">
+
+            </div>
+            <div class="col">
+                <section>
+                    <button id="startBt" class="btn btn-primary mx-2" th:if="${@rq.getUsername() == roomDto.owner.username}" onclick="startGame()">게임시작</button>
+                    <button class="btn btn-secondary mx-2" onclick="exit()">나가기</button>
+                </section>
+            </div>
+
         </div>
-        <hr>
-    </section>
-    <hr>
-    <form th:action method="POST" onsubmit="postMsg(event); return false">
-        <input id="send" name="send" type="text"> <button type="submit">보내기</button>
-    </form>
-    <section>
-        <button th:if="${@rq.getUsername() == roomDto.owner.username}" onclick="startGame()">게임시작</button><span>
-        </span><button onclick="exit()">나가기</button>
-    </section>
+        <div class="row">
+            <div class="col">
+                <div class="d-flex flex-column h-100">
+                    <h4 class="fw-medium">참여자 목록</h4>
+                    <div id="memberList" class="flex-grow-1">
+                    </div>
+                </div>
+            </div>
+            <div class="col align-items-center">
+                <section class="border rounded p-2 d-flex flex-column" style="height: 600px;">
+                    <h4 class="text-decoration-underline my-2">
+                        채팅창
+                    </h4>
+                    <div id="msgBox" class="p-2 border rounded overflow-y-scroll flex-grow-1">
+                    </div>
+                    <form class="d-flex my-2" th:action method="POST" onsubmit="postMsg(event); return false">
+                        <input class="form-control-lg mx-2" id="send" name="send" type="text"> <button class="btn btn-primary" type="submit">보내기</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+        
+    </div>
 
     <script th:inline="javascript">
         const user = /*[[${@rq.getUsername()}]]*/ 'noUser';
-        let state = /*[[${ roomDto.status }]]*/ null;
+        let roomDto = /*[[${ roomDto }]]*/ null;
+
+        function getStatus(){
+            return roomDto.status;
+        }
         console.log(user)
         const roomId = /*[[${ roomDto.id }]]*/ null;
-        let curParticipants = /*[[${ roomDto.numOfCurParticipants }]]*/ 0;
 
-        if(state === "PLAYING"){
+        if (getStatus() === "PLAYING" || getStatus() === "LOADING") {
             window.location.href = `http://localhost:8080/roby/game/${roomId}`;
+        }else{
+            setRoomInfo();
         }
 
         const socket = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
         // const stompClient = Stomp.over(socket);
         const stompClient = new StompJs.Client({
             webSocketFactory: () => socket,
-            debug: function (str){
+            debug: function (str) {
                 console.log(str);
             }
         });
@@ -66,17 +88,26 @@
                     window.location.href = newUrl;
                 } else {
                     if (jsonData.sender === "system" && jsonData.msg.includes("참가")) {
-                        plusMember();
-                    }
-
+                        requestRoomInfo().then(data => {
+                            console.log(data);
+                            roomDto = data;
+                            setMember();
+                        });    
+                    }                    
                     if (jsonData.sender === "system" && jsonData.msg.includes("퇴장")) {
-                        minusMember();
+                        requestRoomInfo().then(data => {
+                            console.log(data);
+                            roomDto = data;
+                            setMember();
+                        });
                     }
 
                     let msgBox = document.getElementById('msgBox');
                     let msgBit = document.createElement("div");
+                    msgBit.className = "text-wrap"
                     msgBit.innerHTML = `${jsonData.sender} : ${jsonData.msg}`
                     msgBox.appendChild(msgBit);
+                    msgBox.scrollTop = msgBox.scrollHeight;
                 }
             })
         }
@@ -87,17 +118,16 @@
         window.addEventListener('beforeunload', function (event) {
             stompClient.deactivate();
         })
+        // function plusMember() {
+        //     curParticipants = curParticipants;
+        //     document.getElementById('curParticipants').innerText = curParticipants;
+        // }
 
-        function plusMember() {
-            curParticipants = curParticipants;
-            document.getElementById('curParticipants').innerText = curParticipants;
-        }
-
-        function minusMember() {
-            curParticipants = curParticipants - 1;
-            document.getElementById('curParticipants').innerText = curParticipants;
-        }
-        plusMember();
+        // function minusMember() {
+        //     curParticipants = curParticipants - 1;
+        //     document.getElementById('curParticipants').innerText = curParticipants;
+        // }
+        // plusMember();
 
         async function changeStatus() {
             const url = "http://localhost:8080/api/game/changeStatus";
@@ -117,8 +147,13 @@
         }
 
         function startGame() {
-            changeStatus();
-            startCountDown(5);
+            if(roomDto.numOfCurParticipants <= 1){
+                toastr["warning"]("혼자서는 할 수 없습니다.");
+            }else{
+                document.getElementById("startBt").disabled = true;
+                changeStatus();
+                startCountDown(5);
+            }
         }
 
         function startCountDown(seconds) {
@@ -143,17 +178,58 @@
             event.preventDefault();
             let sendMsg = document.getElementById('send');
             let msg = sendMsg.value.trim();
-            stompClient.publish({
-                destination: `/app/room${roomId}`,
-                body: JSON.stringify({ msg: msg }),
-            })
-            console.log(msg);
+            if(msg.length !== 0){
+                stompClient.publish({
+                    destination: `/app/room${roomId}`,
+                    body: JSON.stringify({ msg: msg }),
+                })
+                console.log(msg);
+            }
             sendMsg.value = "";
         }
 
         function exit() {
             event.preventDefault();
             window.location.href = "http://localhost:8080/roby/list";
+        }
+
+        function setRoomInfo() {
+            const roomInfoTag = document.getElementById("roomInfo");
+            const article = document.createElement("article")
+            article.innerHTML = `<article>
+                    <h2>방이름 : <span>${roomDto.roomName}</span></h2>
+                    <p class="fs-4 fw-medium">인원 수(현재/최대) : <span id="numOfCurMem">${roomDto.numOfCurParticipants}</span>/<span>${roomDto.numOfParticipants}</span></p>
+                </article>`
+
+            roomInfoTag.appendChild(article);
+            setMember();
+        }
+        
+        function setMember(){
+            const memberListTag = document.getElementById("memberList");
+            const list = document.createElement("div");
+            let member;
+            for(let i = 0;i < roomDto.curMember.length;i++){
+                let memberTag = document.createElement("div");
+                memberTag.className = "border rounded m-2 w-50"
+                memberTag.innerHTML = `${roomDto.curMember[i].username}`
+                list.appendChild(memberTag);
+            }
+            memberListTag.replaceChildren(list);
+            document.getElementById("numOfCurMem").innerHTML = `${roomDto.numOfCurParticipants}`;
+        }
+
+        async function requestRoomInfo(){
+            const url = "http://localhost:8080/api/game/roomInfo/" + roomId
+            try{
+                const response = await fetch(url)
+                const data = response.json();
+                console.log(data);
+    
+                return data;
+            }catch(error){
+                console.error(error)
+            }
         }
     </script>
 </body>

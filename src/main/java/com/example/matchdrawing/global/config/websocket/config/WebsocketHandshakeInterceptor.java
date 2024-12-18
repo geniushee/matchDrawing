@@ -1,8 +1,8 @@
 package com.example.matchdrawing.global.config.websocket.config;
 
+import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
-import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +55,6 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
             cookieString = cookieheader.getFirst().split("; ");
         }
 
-
         if (cookieString.length != 0) {
             List<Cookie> cookies = Arrays.stream(cookieString).map(str -> {
                 String[] arr = str.split("=", 2);
@@ -73,7 +75,7 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
                 }
             }
 
-            // 대기실 접속 처리, 쿼리로 게임방을 특정
+            // 방정보(id) 입력, 쿼리로 게임방을 특정
             String query = request.getURI().getQuery();
 
             String[] querys = query.split("&");
@@ -85,10 +87,10 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
             String roomId = params.get("roomId");
             if (!roomId.isEmpty()) {
                 attributes.put("roomId", roomId);
-                if (member != null) {
-                    // 방정보에 사용자 추가
-                    drawingService.enterWaitingRoom(Long.valueOf(roomId), member);
-                }
+//                if (member != null) {
+//                    // 방정보에 사용자 추가, 컨트롤러로 이동
+//                    drawingService.enterWaitingRoom(Long.valueOf(roomId), member);
+//                }
             }
         }else {
             throw new RuntimeException("로그인이 필요합니다.");

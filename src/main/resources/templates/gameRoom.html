@@ -13,69 +13,80 @@
 </head>
 
 <body layout:fragment="content">
-    <article id="answer1" style="display: none; color: red;">
+    <!--정답 안내-->
+    <article class="position-fixed top-50 start-50 translate-middle text-danger bg-white" id="answer1"
+        style="width: 200px; height: 400px; display: none;">
         <div id="answer2" style=" font-weight: 800; font-size: xx-large;">
         </div>
-        <div id="answer3" style=" font-weight: 800; font-size: large;">
+        <div id="answer3" style=" font-weight: 800; font-size: xx-large;">
         </div>
     </article>
-    <main style="display: flex;">
-        <section id="loading">
-            Loading...
-        </section>
-        <section id="main" style="display: none;">
-            <section id="questionSet" style="font-size: 3rem; font-weight: bold; display: block;">
+    <!--로딩 스피너-->
+    <article id="loading" class="position-fixed top-50 start-50 translate-middle text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </article>
+    <!--Main-->
+    <main class="container-fluid position-relative" id="main">
+        <div class="row justify-content-center">
+            <h2 class="fw-bold text-center mt-2 text-decoration-underline" id="questionSet">
                 <span>문제 : </span><span id="question"></span>
-            </section>
-            <!-- 그리는 사람 제외 비활성화 필요 -->
-            <section id="tools" style="border : 1px solid; padding: 5px; max-width: 20%">
-                <div style="margin-left: 5px; margin-bottom: 10px;">
-                    <button id="pencil">pencil</button>
-                    <button id="eraser">eraser</button>
-                    <button id="clearBt">clear</button>
-                </div>
-                <section style="margin: 5px">
-                    <div>pencil options</div>
-                    <p>
-                        <label for="colorPick">color : </label>
-                        <input type="color" value="#000000" id="colorPick">
-                    </p>
-                    <p>
-                        <label for="widthPick">width : </label>
-                        <input style="width: 5em;" type="number" value="5" id="widthPick">
-                    </p>
-                    <p>
-                        <button id="pencilDefault">기본 연필</button>
-                    </p>
+            </h2>
+        </div>
+        <div class="row">
+            <div class="col-lg-7 position-relative d-flex justify-content-center align-items-center">
+                <!-- 그리는 사람 제외 비활성화 필요 -->
+                <section class="z-2 position-absolute top-0 start-0 border rounded p-1 w-20 bg-white opacity-75"
+                    id="tools">
+                    <div class="d-flex flex-column justify-content-around">
+                        <button class="btn btn-outline-info" id="pencil">pencil</button>
+                        <button class="btn btn-outline-info" id="eraser">eraser</button>
+                        <button class="btn btn-outline-info" id="clearBt">clear</button>
+                        <button class="btn btn-outline-primary" id="pencilDefault">기본 연필</button>
+                    </div>
+                    <section class="d-flex flex-column justify-content-around mt-1">
+                        <h5>pencil options</h5>
+                        <p class="d-flex align-items-center">
+                            <label class="form-label" for="colorPick">color : </label>
+                            <input class="form-control form-control-color ml-1" type="color" value="#000000"
+                                id="colorPick">
+                        </p>
+                        <p class="d-flex align-items-center">
+                            <label class="form-label" for="widthPick">width : </label>
+                            <input class="form-control ml-1" style="width: 5em;" type="number" value="5" id="widthPick">
+                        </p>
+                    </section>
                 </section>
-            </section>
-            <!--캔버스-->
-            <canvas id="canvas" style="margin-left: 10px; border : solid" width="300" height="300"></canvas>
-            <section style="display: flex; flex-direction: column; margin: 5px">
-                <section id="playerList">
-                    <ul>
-                        <li th:each="mem, info :${roomDto.curMember}">
-                            <span th:id="|${mem.username}_score|"></span><span th:text="${mem.username}"></span>
+                <!--캔버스-->
+                <canvas class="z-1 border top-0 end-0" id="canvas" width="600" height="600"></canvas>
+            </div>
+            <div class="col-lg-5">
+                <section class="d-flex flex-column m-5">
+                    <ul class="list-group flex-grow-1 mb-2" id="playerList">
+                        <li class="list-group-item" th:each="mem, info :${roomDto.curMember}">
+                            <span class="badge text-bg-primary rounded-pill"
+                                th:id="|${mem.username}_score|"></span><span class="mx-2"
+                                th:text="${mem.username}"></span>
                         </li>
                     </ul>
-
+                    <section class="border rounded p-2 d-flex flex-column" style="height: 600px;">
+                        <h4 class="text-decoration-underline my-2">
+                            채팅창
+                        </h4>
+                        <div id="msgBox" class="p-2 border rounded overflow-y-scroll flex-grow-1">
+                        </div>
+                        <form class="d-flex my-2" th:action method="POST" id="msgForm">
+                            <input class="form-control-lg mx-2" id="send" name="send" type="text"> <button
+                                class="btn btn-primary" type="submit">보내기</button>
+                        </form>
+                    </section>
                 </section>
-                <section id="msgBox">
-                    <div>
-                        채팅창
-                    </div>
-                    <hr>
-                </section>
-                <hr>
-                <form id="msgForm" th:action method="POST">
-                    <input id="send" name="send" type="text"> <button type="submit">보내기</button>
-                </form>
-            </section>
-        </section>
+            </div>
+        </div>
     </main>
 
     <script th:inline="javascript">
-
         const username = /*[[${@rq.getUsername()}]]*/ 'noUser';
         const roomInfo = /*[[${ roomDto }]]*/ { id: null };
         const roomId = roomInfo.id;
@@ -123,7 +134,7 @@
                 const isLoaded = await isLoading();
                 if (isLoaded) {
                     loadingSection.style.display = "none";
-                    mainSection.style.display = "flex"
+                    mainSection.style.display = "block"
 
                     setAnswerList();
                     clearInterval(interval) //반복 중단
@@ -139,7 +150,7 @@
                 }
                 console.log(answers);
                 setQuestion(answers.first().answer)
-                if(isOwner(username)){
+                if (isOwner(username)) {
                     countUpAnswer(answers.first().answerId, "QUESTION")
                 }
             }
@@ -148,7 +159,7 @@
         // 정답 큐 생성
         const answers = new window.QueueList();
         // 문제는 방장만 보이도록 세팅
-        if(!isOwner(username)){
+        if (!isOwner(username)) {
             let questionSet = document.getElementById("questionSet");
             questionSet.style.display = "none"
         }
@@ -234,15 +245,15 @@
                 if (!isOwner(jsonData.sender)) {
                     if (jsonData.msg.includes(answers.first().answer)) {
                         showAnswer(jsonData.sender, answers.dequeue());
-                        if(answers.size() !== 0){
+                        if (answers.size() !== 0) {
                             setQuestion(answers.first().answer)
-                        }else{
+                        } else {
                             setQuestion("")
                             let winnerUsername;
                             let maxScore = -1;
-                            for(let i =0;i<roomInfo.curMember.length;i++){
+                            for (let i = 0; i < roomInfo.curMember.length; i++) {
                                 let score = scoreMap.get(roomInfo.curMember[i].username)
-                                if(score > maxScore){
+                                if (score > maxScore) {
                                     winnerUsername = roomInfo.curMember[i].username;
                                     maxScore = score;
                                 }
@@ -250,6 +261,13 @@
                             alert(`문제를 모두 풀었습니다.
                             가장 높은 점수는 ${maxScore}로 ${winnerUsername}가 1등입니다.
                             로비로 이동합니다.`)
+                            exitGame().then(response => {
+                                if(response){
+                                    console.log("방 나가기 완료")
+                                }else{
+                                    console.log("방에서 안 나가졌다. 확인해보자.")
+                                }
+                            });
                             window.location.href = "http://localhost:8080/roby/list";
                         }
                     }
@@ -265,10 +283,11 @@
         //StompJs 버전 변경으로 추가
         stompClient_dr.activate();
         stompClient_msg.activate();
-
+        
         // 페이지 이동 및 윈도우 닫을 시 disconnect
         window.addEventListener('beforeunload', function (event) {
-            stompClient.deactivate();
+            stompClient_dr.deactivate();
+            stompClient_msg.deactivate();
         })
 
         // 방장만 그리기 도구가 보이도록
@@ -402,7 +421,7 @@
         }
 
         function showAnswer(_username, _answer) {
-            if(isOwner(username)){
+            if (isOwner(username)) {
                 countUpAnswer(_answer.answerId, "CORRECT")
             }
 
@@ -423,6 +442,7 @@
                 answerTxt.style.display = "none";
                 answerBit1.innerHTML = "";
                 answerBit2.innerHTML = "";
+                clear.click();
             }, 3000);
         }
 
@@ -440,11 +460,22 @@
             })
         }
 
-        //점수판
+        //점수판 초기화
         const scoreMap = new Map();
         for (const member of roomInfo.curMember) {
             if (!isOwner(member.username)) {
                 scoreMap.set(member.username, 0)
+            } else {
+                scoreMap.set(member.username, "Owner")
+            }
+        }
+        initScore();
+
+
+        function initScore() {
+            for (const [username, score] of scoreMap) {
+                let scoreLabel = document.getElementById(`${username}_score`)
+                scoreLabel.innerHTML = scoreMap.get(username);
             }
         }
 
@@ -459,6 +490,21 @@
             const questionTag = document.getElementById("question");
             questionTag.innerHTML = question;
         }
+
+        async function exitGame() {
+                const url = "http://localhost:8080/api/game/exitGame";
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        roomId: roomId,
+                        username: username,
+                    })
+                });
+                return response;
+            }
 
     </script>
 </body>

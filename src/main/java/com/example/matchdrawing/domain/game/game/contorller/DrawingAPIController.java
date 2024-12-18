@@ -1,8 +1,12 @@
 package com.example.matchdrawing.domain.game.game.contorller;
 
-import com.example.matchdrawing.domain.game.game.dto.*;
+import com.example.matchdrawing.domain.game.game.dto.ChangeRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.CountType;
+import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.LoadingRoomDto;
 import com.example.matchdrawing.domain.game.game.service.AnswerService;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
+import com.example.matchdrawing.global.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +24,7 @@ import java.util.List;
 public class DrawingAPIController {
     private final DrawingService drawingService;
     private final AnswerService answerService;
+    private final Rq rq;
 
     @GetMapping("/list")
     public ResponseEntity<?> showRoomList() {
@@ -35,6 +40,12 @@ public class DrawingAPIController {
             return null;
         }
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/roomInfo/{id}")
+    public ResponseEntity<?> getRoomInfo(@PathVariable(name = "id")Long id){
+        DrawingRoomDto dto = drawingService.findRoomDtoById(id);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/changeStatus")
@@ -70,6 +81,17 @@ public class DrawingAPIController {
             return ResponseEntity.ok(true);
         }
         return ResponseEntity.ok(false);
+    }
+
+    @PostMapping("/exitGame")
+    public ResponseEntity<?> exitGame(@RequestBody LoadingRoomDto dto){
+        try {
+            drawingService.exitRoom(dto.getRoomId(), rq.getMember());
+            return ResponseEntity.ok(true);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(false);
+        }
+
     }
 
     @PostMapping("/completeLoading")

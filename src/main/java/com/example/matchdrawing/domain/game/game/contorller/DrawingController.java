@@ -14,6 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/roby")
@@ -37,7 +40,8 @@ public class DrawingController {
         if(rq.isLogin()){
         return "createRoom";
         }
-        return "redirect:/roby";
+        String msg = URLEncoder.encode("로그인이 필요합니다.", StandardCharsets.UTF_8);
+        return "redirect:/roby?msg="+msg;
     }
 
     /**
@@ -56,9 +60,11 @@ public class DrawingController {
     public String enterRoom(@PathVariable(name="roomId")Long roomId,
                             Model model){
         if(!rq.isLogin()){
-            return  "redirect:/member/signin";
+            String msg = URLEncoder.encode("로그인이 필요합니다.", StandardCharsets.UTF_8);
+            return "redirect:/roby/singin?msg="+msg;
         }
 
+        drawingService.enterWaitingRoom(roomId, rq.getMember());
         DrawingRoomDto roomDto = drawingService.findRoomDtoById(roomId);
         model.addAttribute("roomDto", roomDto);
 
