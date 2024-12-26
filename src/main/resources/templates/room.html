@@ -7,48 +7,46 @@
 </head>
 
 <body layout:fragment="content">
-    <div class="container mt-5 vh-80">
-        <div class="row">
-            <div class="col" id="roomInfo">
+    <div class="container full-height d-flex align-items-stretch">
+        <div class="w-100 my-3 p-3 bg-light bg-opacity-50 d-flex flex-column">
+            <div class="row">
+                <div class="col" id="roomInfo">
 
-            </div>
-            <div class="col">
-                <section>
-                    <button id="startBt" class="btn btn-primary mx-2" th:if="${@rq.getUsername() == roomDto.owner.username}" onclick="startGame()">게임시작</button>
+                </div>
+                <div class="col d-flex justify-content-end align-self-center">
+                    <button id="startBt" class="btn btn-primary mx-2"
+                        th:if="${@rq.getUsername() == roomDto.owner.username}" onclick="startGame()">게임시작</button>
                     <button class="btn btn-secondary mx-2" onclick="exit()">나가기</button>
-                </section>
+                </div>
             </div>
-
-        </div>
-        <div class="row">
-            <div class="col">
-                <div class="d-flex flex-column h-100">
-                    <h4 class="fw-medium">참여자 목록</h4>
+            <div class="row flex-grow-1 align-items-stretch">
+                <div class="col d-flex flex-column border rounded p-2">
+                    <h4 class="text-decoration-underline py-2">참여자 목록</h4>
                     <div id="memberList" class="flex-grow-1">
                     </div>
                 </div>
-            </div>
-            <div class="col align-items-center">
-                <section class="border rounded p-2 d-flex flex-column" style="height: 600px;">
-                    <h4 class="text-decoration-underline my-2">
-                        채팅창
-                    </h4>
-                    <div id="msgBox" class="p-2 border rounded overflow-y-scroll flex-grow-1">
-                    </div>
-                    <form class="d-flex my-2" th:action method="POST" onsubmit="postMsg(event); return false">
-                        <input class="form-control-lg mx-2" id="send" name="send" type="text"> <button class="btn btn-primary" type="submit">보내기</button>
-                    </form>
-                </section>
+                <div class="col">
+                    <section class="h-100 border rounded p-2 d-flex flex-column" style="min-height: 450px;">
+                        <h4 class="text-decoration-underline my-2">
+                            채팅창
+                        </h4>
+                        <div id="msgBox" class="p-2 border border-dark rounded overflow-y-scroll flex-grow-1">
+                        </div>
+                        <form class="d-flex my-2" th:action method="POST" onsubmit="postMsg(event); return false">
+                            <input class="form-control-lg mx-2 flex-grow-1" id="send" name="send" type="text"> <button
+                                class="btn btn-primary" type="submit">보내기</button>
+                        </form>
+                    </section>
+                </div>
             </div>
         </div>
-        
     </div>
 
     <script th:inline="javascript">
         const user = /*[[${@rq.getUsername()}]]*/ 'noUser';
         let roomDto = /*[[${ roomDto }]]*/ null;
 
-        function getStatus(){
+        function getStatus() {
             return roomDto.status;
         }
         console.log(user)
@@ -56,7 +54,7 @@
 
         if (getStatus() === "PLAYING" || getStatus() === "LOADING") {
             window.location.href = `http://localhost:8080/roby/game/${roomId}`;
-        }else{
+        } else {
             setRoomInfo();
         }
 
@@ -92,8 +90,8 @@
                             console.log(data);
                             roomDto = data;
                             setMember();
-                        });    
-                    }                    
+                        });
+                    }
                     if (jsonData.sender === "system" && jsonData.msg.includes("퇴장")) {
                         requestRoomInfo().then(data => {
                             console.log(data);
@@ -147,9 +145,9 @@
         }
 
         function startGame() {
-            if(roomDto.numOfCurParticipants <= 1){
+            if (roomDto.numOfCurParticipants <= 1) {
                 toastr["warning"]("혼자서는 할 수 없습니다.");
-            }else{
+            } else {
                 document.getElementById("startBt").disabled = true;
                 changeStatus();
                 startCountDown(5);
@@ -178,7 +176,7 @@
             event.preventDefault();
             let sendMsg = document.getElementById('send');
             let msg = sendMsg.value.trim();
-            if(msg.length !== 0){
+            if (msg.length !== 0) {
                 stompClient.publish({
                     destination: `/app/room${roomId}`,
                     body: JSON.stringify({ msg: msg }),
@@ -196,22 +194,19 @@
         function setRoomInfo() {
             const roomInfoTag = document.getElementById("roomInfo");
             const article = document.createElement("article")
-            article.innerHTML = `<article>
-                    <h2>방이름 : <span>${roomDto.roomName}</span></h2>
-                    <p class="fs-4 fw-medium">인원 수(현재/최대) : <span id="numOfCurMem">${roomDto.numOfCurParticipants}</span>/<span>${roomDto.numOfParticipants}</span></p>
-                </article>`
-
+            article.innerHTML = `<h2>방이름 : <span>${roomDto.roomName}</span></h2>
+                    <p class="fs-4 fw-medium">인원 수(현재/최대) : <span id="numOfCurMem">${roomDto.numOfCurParticipants}</span>/<span>${roomDto.numOfParticipants}</span></p>`
             roomInfoTag.appendChild(article);
             setMember();
         }
-        
-        function setMember(){
+
+        function setMember() {
             const memberListTag = document.getElementById("memberList");
             const list = document.createElement("div");
             let member;
-            for(let i = 0;i < roomDto.curMember.length;i++){
+            for (let i = 0; i < roomDto.curMember.length; i++) {
                 let memberTag = document.createElement("div");
-                memberTag.className = "border rounded m-2 w-50"
+                memberTag.className = "border border-dark rounded m-2 w-50"
                 memberTag.innerHTML = `${roomDto.curMember[i].username}`
                 list.appendChild(memberTag);
             }
@@ -219,15 +214,15 @@
             document.getElementById("numOfCurMem").innerHTML = `${roomDto.numOfCurParticipants}`;
         }
 
-        async function requestRoomInfo(){
+        async function requestRoomInfo() {
             const url = "http://localhost:8080/api/game/roomInfo/" + roomId
-            try{
+            try {
                 const response = await fetch(url)
                 const data = response.json();
                 console.log(data);
-    
+
                 return data;
-            }catch(error){
+            } catch (error) {
                 console.error(error)
             }
         }

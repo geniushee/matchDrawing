@@ -11,8 +11,8 @@
 ### 진행중
 - Controller 단위 테스트
 - Websocket 테스트
-- CSS(Bootstrap) 작업 - 배경그림 추가 필요(중요!)
-- 
+- CSS(Bootstrap) 작업 - 채팅방 및 게임방 개선
+- layout 분리 로비 / 게임방
 
 <br>
 

@@ -61,7 +61,7 @@ public class DrawingController {
                             Model model){
         if(!rq.isLogin()){
             String msg = URLEncoder.encode("로그인이 필요합니다.", StandardCharsets.UTF_8);
-            return "redirect:/roby/singin?msg="+msg;
+            return "redirect:/roby/signin?msg="+msg;
         }
 
         drawingService.enterWaitingRoom(roomId, rq.getMember());
