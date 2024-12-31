@@ -20,23 +20,21 @@
                 </div>
             </div>
             <div class="row flex-grow-1 align-items-stretch">
-                <div class="col d-flex flex-column border rounded p-2">
+                <div class="col d-flex flex-column border rounded mx-1 p-2">
                     <h4 class="text-decoration-underline py-2">참여자 목록</h4>
                     <div id="memberList" class="flex-grow-1">
                     </div>
                 </div>
-                <div class="col">
-                    <section class="h-100 border rounded p-2 d-flex flex-column" style="min-height: 450px;">
-                        <h4 class="text-decoration-underline my-2">
-                            채팅창
-                        </h4>
-                        <div id="msgBox" class="p-2 border border-dark rounded overflow-y-scroll flex-grow-1">
-                        </div>
-                        <form class="d-flex my-2" th:action method="POST" onsubmit="postMsg(event); return false">
-                            <input class="form-control-lg mx-2 flex-grow-1" id="send" name="send" type="text"> <button
-                                class="btn btn-primary" type="submit">보내기</button>
-                        </form>
-                    </section>
+                <div class="col border rounded mx-1 p-2 d-flex flex-column">
+                    <h4 class="text-decoration-underline my-2">
+                        채팅창
+                    </h4>
+                    <div id="msgBox" class="p-2 border border-dark rounded overflow-y-scroll flex-grow-1">
+                    </div>
+                    <form class="d-flex my-2" th:action method="POST" onsubmit="postMsg(event); return false">
+                        <input class="form-control-lg mx-2 flex-grow-1" id="send" name="send" type="text"> <button
+                            class="btn btn-primary" type="submit">보내기</button>
+                    </form>
                 </div>
             </div>
         </div>

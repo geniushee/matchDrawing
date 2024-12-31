@@ -14,8 +14,8 @@
 
 <body layout:fragment="content">
     <!--정답 안내-->
-    <article class="position-fixed top-50 start-50 translate-middle text-danger bg-white" id="answer1"
-        style="width: 200px; height: 400px; display: none;">
+    <article class="z-2 position-fixed top-50 start-50 translate-middle text-danger bg-white" id="answer1"
+        style="display: none;">
         <div id="answer2" style=" font-weight: 800; font-size: xx-large;">
         </div>
         <div id="answer3" style=" font-weight: 800; font-size: xx-large;">
@@ -28,15 +28,15 @@
         </div>
     </article>
     <!--Main-->
-    <main class="container-fluid full-height" id="main">
-        <div class="row justify-content-center align-items-stretch">
-            <div class="col-lg-7">
-                <div class="row justify-content-center">
+    <main class="container full-height" id="main">
+        <div class="row full-height">
+            <div class="col-lg-7 h-100 d-flex flex-column justify-content-center">
+                <div class="row mt-5">
                     <h2 class="fw-bold text-center mt-2 text-decoration-underline" id="questionSet">
                         <span>문제 : </span><span id="question"></span>
                     </h2>
                 </div>
-                <div class="row justify-content-center align-items-stretch position-relative">
+                <div class="row flex-grow-1 justify-content-center align-items-center position-relative">
                     <!-- 그리는 사람 제외 비활성화 필요 -->
                     <section class="z-2 position-absolute top-0 start-0 w-25
                      border rounded p-1 bg-white opacity-75" id="tools">
@@ -67,9 +67,9 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-5 d-flex flex-column">
-                <section class="row mb-2">
-                    <div class="col">
+            <div class="col-lg-5 h-100 d-flex flex-column">
+                <section class="row">
+                    <div class="col pt-5">
                         <ul class="list-group" id="playerList">
                             <li class="list-group-item" th:each="mem, info :${roomDto.curMember}">
                                 <span class="badge text-bg-primary rounded-pill"
@@ -80,8 +80,8 @@
                     </div>
                 </section>
                 <section class="row flex-grow-1">
-                    <div class="col">
-                        <section class="h-100 bg-light border rounded p-2 d-flex flex-column" style="max-height: 600px;">
+                    <div class="col py-5">
+                        <section class="w-100 h-100 bg-light border rounded p-2 d-flex flex-column" style="max-height: 600px;">
                             <h4 class="text-decoration-underline my-2">
                                 채팅창
                             </h4>
@@ -274,9 +274,11 @@
                                     maxScore = score;
                                 }
                             }
-                            alert(`문제를 모두 풀었습니다.
+                            alert(`
+                            문제를 모두 풀었습니다.
                             가장 높은 점수는 ${maxScore}로 ${winnerUsername}가 1등입니다.
-                            로비로 이동합니다.`)
+                            로비로 이동합니다.
+                            `)
                             exitGame().then(response => {
                                 if (response) {
                                     console.log("방 나가기 완료")
@@ -346,12 +348,12 @@
                         body: JSON.stringify({ msg: pathData })
                     })
                 } else {
-                    alert("조금 더 작게 그려주세요.");
                     canvas.discardActiveObject();
                     let sel = new fabric.ActiveSelection([JSON.parse(pathData)], {
                         canvas: canvas,
                     });
                     sel.removeAll();
+                    alert("조금 더 작게 그려주세요.");
                 }
 
                 // 그림 데이터 json으로 생성
@@ -374,10 +376,12 @@
             $('pencilDefault').onclick = function () {
                 canvas.freeDrawingBrush.color = '#000000';
                 canvas.freeDrawingBrush.width = 5;
+                pencilColor.value = '#000000';
+                pencilWidth.value = 5;
             }
 
             eraser.onclick = function () {
-                canvas.freeDrawingBrush.color = '#ffffff';
+                canvas.freeDrawingBrush.color = '#F8F9FA';
                 canvas.freeDrawingBrush.width = 20;
             }
 
