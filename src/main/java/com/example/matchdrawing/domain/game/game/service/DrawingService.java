@@ -1,6 +1,7 @@
 package com.example.matchdrawing.domain.game.game.service;
 
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.LoadingRoomDto;
 import com.example.matchdrawing.domain.game.game.entity.Answer;
 import com.example.matchdrawing.domain.game.game.entity.DrawingRoom;
 import com.example.matchdrawing.domain.game.game.entity.LoadingRoom;
@@ -50,7 +51,7 @@ public class DrawingService {
                 .build();
 
         room = drawingRoomRepository.save(room);
-        enterWaitingRoom(room.getId(), user);
+//        enterWaitingRoom(room.getId(), user);
 
         return new DrawingRoomDto(room);
     }
@@ -186,5 +187,9 @@ public class DrawingService {
 
         LoadingRoom lr = loadingRoomRepository.findByRoomId(roomId);
         loadingRoomRepository.delete(lr);
+    }
+
+    public LoadingRoomDto findLoadingRoomDtoByRoomId(Long roomId){
+        return new LoadingRoomDto(loadingRoomRepository.findByRoomId(roomId));
     }
 }

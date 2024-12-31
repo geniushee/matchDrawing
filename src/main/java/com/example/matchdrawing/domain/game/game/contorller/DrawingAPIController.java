@@ -3,7 +3,7 @@ package com.example.matchdrawing.domain.game.game.contorller;
 import com.example.matchdrawing.domain.game.game.dto.ChangeRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.CountType;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
-import com.example.matchdrawing.domain.game.game.dto.LoadingRoomDto;
+import com.example.matchdrawing.domain.game.game.dto.LoadingRoomRequestDto;
 import com.example.matchdrawing.domain.game.game.service.AnswerService;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.global.Rq;
@@ -61,7 +61,6 @@ public class DrawingAPIController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
     }
 
     @GetMapping("/isLoading")
@@ -75,7 +74,7 @@ public class DrawingAPIController {
     }
 
     @PostMapping("/enterGame")
-    public ResponseEntity<?> enterGame(@RequestBody LoadingRoomDto dto){
+    public ResponseEntity<?> enterGame(@RequestBody LoadingRoomRequestDto dto){
         boolean check = drawingService.enterGame(dto.getRoomId(), dto.getUsername());
         if(check){
             return ResponseEntity.ok(true);
@@ -84,7 +83,7 @@ public class DrawingAPIController {
     }
 
     @PostMapping("/exitGame")
-    public ResponseEntity<?> exitGame(@RequestBody LoadingRoomDto dto){
+    public ResponseEntity<?> exitGame(@RequestBody LoadingRoomRequestDto dto){
         try {
             drawingService.exitRoom(dto.getRoomId(), rq.getMember());
             return ResponseEntity.ok(true);
@@ -95,7 +94,7 @@ public class DrawingAPIController {
     }
 
     @PostMapping("/completeLoading")
-    public void completeLoading(@RequestBody LoadingRoomDto dto){
+    public void completeLoading(@RequestBody LoadingRoomRequestDto dto){
         drawingService.deleteLoadingRoom(dto.getRoomId());
     }
 
