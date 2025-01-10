@@ -11,8 +11,6 @@
 ### 진행중
 - Controller 단위 테스트
 - Websocket 테스트
-- CSS(Bootstrap) 작업 - 채팅방 및 게임방 개선
-- layout 분리 로비 / 게임방
 
 <br>
 
@@ -30,3 +28,8 @@
   - 문제를 다 푼 후 더 많은 문제 제공기능
   - 정답 종류 추가 기능(현재는 144개의 동물들로 구성)
   - 게임 페이지는 별도 레이아웃 적용
+
+<br>
+
+### 보류
+- room에서는 boostrap의 offcanvasNavbar를 사용하려고 했으나, offcanvas가 열리지 않는 문제 발생.

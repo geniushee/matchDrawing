@@ -52,6 +52,7 @@ public class DrawingService {
 
         room = drawingRoomRepository.save(room);
 //        enterWaitingRoom(room.getId(), user);
+        createLoadingRoom(room.getId());
 
         return new DrawingRoomDto(room);
     }
@@ -125,6 +126,7 @@ public class DrawingService {
 
     @Transactional
     public void breakRoom(DrawingRoom room){
+        deleteLoadingRoom(room.getId());
         drawingRoomRepository.delete(room);
     }
 
@@ -150,7 +152,9 @@ public class DrawingService {
     @Transactional
     public void changeRoomStatus(Long id, String status) {
         DrawingRoom room = findById(id);
+        LoadingRoom loadingRoom = loadingRoomRepository.findByRoomId(id).get();
         room.changeStatus(status);
+        loadingRoom.changeStatus(status);
     }
 
     @Transactional
@@ -163,7 +167,8 @@ public class DrawingService {
     }
 
     public boolean checkLoadingByRoomId(Long roomId) {
-        LoadingRoom loading = loadingRoomRepository.findByRoomId(roomId);
+        LoadingRoom loading = loadingRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new RuntimeException("로딩룸을 찾을 수 없습니다."));
         return loading.loadingComplete();
     }
 
@@ -182,14 +187,12 @@ public class DrawingService {
 
     @Transactional
     public void deleteLoadingRoom(Long roomId) {
-        DrawingRoom dr = findById(roomId);
-        dr.changeStatus("PLAYING");
-
-        LoadingRoom lr = loadingRoomRepository.findByRoomId(roomId);
-        loadingRoomRepository.delete(lr);
+        Optional<LoadingRoom> opLr = loadingRoomRepository.findByRoomId(roomId);
+        opLr.ifPresent(loadingRoomRepository::delete);
     }
 
     public LoadingRoomDto findLoadingRoomDtoByRoomId(Long roomId){
-        return new LoadingRoomDto(loadingRoomRepository.findByRoomId(roomId));
+        Optional<LoadingRoom> opLr = loadingRoomRepository.findByRoomId(roomId);
+        return opLr.map(LoadingRoomDto::new).orElse(null);
     }
 }

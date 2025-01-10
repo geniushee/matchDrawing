@@ -1,4 +1,4 @@
-<html layout:decorate="~{global/layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<html layout:decorate="~{global/roomLayout}" xmlns:layout="http://www.w3.org/1999/xhtml">
 
 <head>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
@@ -125,7 +125,7 @@
         // }
         // plusMember();
 
-        async function changeStatus() {
+        async function changeStatus(status) {
             const url = "http://localhost:8080/api/game/changeStatus";
             const response = await fetch(url,
                 {
@@ -133,7 +133,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         id: roomId,
-                        status: "LOADING"
+                        status: status
                     })
                 }
             );
@@ -147,7 +147,7 @@
                 toastr["warning"]("혼자서는 할 수 없습니다.");
             } else {
                 document.getElementById("startBt").disabled = true;
-                changeStatus();
+                changeStatus("LOADING");
                 startCountDown(5);
             }
         }

@@ -41,10 +41,11 @@ public class AnswerService {
     public List<Answer> createAnswerList(int count) {
         Long id;
         List<Answer> list = new ArrayList<>();
-        for(int i = 0; i < count; i++){
+        // 같은 답이 리스트 안에 있으면 count수보다 적은 list를 반환하는 에러 수정 todo 다음 커밋에서 지우기
+        while(list.size() < count) {
             id = Double.valueOf(Math.floor(Math.random() * getTotalAnswersCount())).longValue() + 1L;
             Answer item = findById(id);
-            if(!list.contains(item))list.add(item); // 랜덤을 해도 같은게 나올 수 있다...
+            if(!list.contains(item)) list.add(item); // 랜덤을 해도 같은게 나올 수 있다...
         }
         return list;
     }

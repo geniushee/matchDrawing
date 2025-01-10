@@ -53,9 +53,10 @@ public class DrawingAPIController {
         try {
             drawingService.changeRoomStatus(dto.getId(), dto.getStatus());
 
-            if (dto.getStatus().equals("LOADING")) {
-                drawingService.createLoadingRoom(dto.getId());
-            }
+            // 로딩룸을 만드는 기능은 게임룸을 만들때 같이 만드는 방법으로 변경, 기능 분리
+//            if (dto.getStatus().equals("LOADING")) {
+//                drawingService.createLoadingRoom(dto.getId());
+//            }
 
             return ResponseEntity.ok(true);
         } catch (Exception e) {

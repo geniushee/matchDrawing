@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" layout:decorate="~{global/layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<html lang="ko" layout:decorate="~{global/roomLayout}" xmlns:layout="http://www.w3.org/1999/xhtml">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameRoom</title>
     <script src="https://cdn.jsdelivr.net/npm/fabric@6.4.3/dist/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -11,11 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>
     <script th:src="@{/js/QueueList.js}"></script>
 </head>
-
-<body layout:fragment="content">
+<body>
+<div layout:fragment="content">
     <!--정답 안내-->
-    <article class="z-2 position-fixed top-50 start-50 translate-middle text-danger bg-white" id="answer1"
-        style="display: none;">
+    <article class="z-2 position-fixed top-50 start-50 translate-middle text-danger text-center bg-white rounded" id="answer1"
+        style="display: none; --bs-bg-opacity: .5;">
         <div id="answer2" style=" font-weight: 800; font-size: xx-large;">
         </div>
         <div id="answer3" style=" font-weight: 800; font-size: xx-large;">
@@ -28,10 +26,10 @@
         </div>
     </article>
     <!--Main-->
-    <main class="container full-height" id="main">
+    <main class="container-fruid p-3 full-height" id="main">
         <div class="row full-height">
             <div class="col-lg-7 h-100 d-flex flex-column justify-content-center">
-                <div class="row mt-5">
+                <div class="row mt-3">
                     <h2 class="fw-bold text-center mt-2 text-decoration-underline" id="questionSet">
                         <span>문제 : </span><span id="question"></span>
                     </h2>
@@ -69,7 +67,7 @@
             </div>
             <div class="col-lg-5 h-100 d-flex flex-column">
                 <section class="row">
-                    <div class="col pt-5">
+                    <div class="col pt-3">
                         <ul class="list-group" id="playerList">
                             <li class="list-group-item" th:each="mem, info :${roomDto.curMember}">
                                 <span class="badge text-bg-primary rounded-pill"
@@ -148,6 +146,7 @@
                     loadingSection.style.display = "none";
                     mainSection.style.display = "block"
 
+                    changeStatus("PLAYING")
                     setAnswerList();
                     clearInterval(interval) //반복 중단
                 } else {
@@ -166,6 +165,23 @@
                     countUpAnswer(answers.first().answerId, "QUESTION")
                 }
             }
+
+            async function changeStatus(status) {
+            const url = "http://localhost:8080/api/game/changeStatus";
+            const response = await fetch(url,
+                {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: roomId,
+                        status: status
+                    })
+                }
+            );
+            if (!response.ok) {
+                exit();
+            }
+        }
         })
 
         // 정답 큐 생성
@@ -525,8 +541,8 @@
             });
             return response;
         }
-
     </script>
+</div>
 </body>
 
 </html>

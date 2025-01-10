@@ -35,6 +35,7 @@ public class MemberController {
     @PostMapping("/signin")
     public String signIn(@ModelAttribute MemberSignInDto dto,
                          HttpServletResponse response){
+        //로그인 성공 시
         if(memberService.check(dto.getName(), dto.getPassword())){
             Cookie cookie = new Cookie("login", dto.getName());
             cookie.setPath("/");
@@ -42,9 +43,9 @@ public class MemberController {
             cookie.setHttpOnly(true);
 
             response.addCookie(cookie);
-            return "redirect:/roby";
+            return "redirect:/roby/list";
         }
-
+        // 로그인 실패시
         return "redirect:/roby";
     }
     @PostMapping("/logout")

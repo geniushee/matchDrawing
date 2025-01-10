@@ -1,5 +1,18 @@
 <html layout:decorate="~{global/layout}">
     <body layout:fragment= "content">
-        home
+        <div class="container full-height d-flex justify-content-center align-items-center">
+             <div class="h-50 p-3 bg-light rounded-4 d-flex flex-column justify-content-around align-items-center"
+             style=" --bs-bg-opacity: .5;">
+                <h1 class="text-center fw-bold">그림을 그리고 어떤 그림인지 맞춰보세요!</h1>
+                <h2 class="text-center">어떤 그림이든 그려보고 무슨 그림을 그렸는지 맞춰보세요.</h2>
+                <div class="bg-info rounded p-2 text-center" style=" --bs-bg-opacity: .5;">현재는 144종류의 동물들이 준비되어 있습니다.</div>
+                <div class="d-flex justify-content-center">
+                    <a class="btn btn-primary mx-3" th:if= "${@rq.isLogin()}" th:href="@{/roby/list}">게임방 목록</a>
+                    <a class="btn btn-primary mx-3" th:if= "${!@rq.isLogin()}" th:href="@{/member/signup}">회원가입</a>
+                    <a class="btn btn-primary mx-3" th:if= "${!@rq.isLogin()}" th:href="@{/member/signin}">로그인</a>
+                </div>
+
+            </div>
+        </div>
     </body>
 </html>
