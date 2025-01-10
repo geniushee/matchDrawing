@@ -1,15 +1,13 @@
 spring:
-  profiles:
-    active: dev
-    include: secret, websocket
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:./dev_db;MODE=MYSQL;
+    username: sa
+    password:
   jpa:
-    properties:
-      hibernate:
-        format_sql: true
-        show_sql: true
-        default_batch_fetch_size: 100
-        use_sql_comments: true
-    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.H2Dialect
   threads:
     virtual:
       enabled: true
@@ -25,18 +23,6 @@ spring:
 #    stompPort: "${custom.rabbitmq.stompPort}"
 #    username: "${custom.rabbitmq.username}"
 #    password: "${custom.rabbitmq.password}"
-
-server:
-  port: 8080
-
-logging:
-  level:
-    com.example.matchingdrawing : debug
-    org.hibernate.sql : debug
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
-    org.springframework.transaction.interceptor: TRACE
-#    org.springframework.kafka : debug
 
 #custom:
 #  site:

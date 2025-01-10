@@ -75,7 +75,7 @@ public class DrawingServiceTest {
 
         //게임 시작
         drawingService.changeRoomStatus(roomDto1.getId(), "LOADING");
-        drawingService.createLoadingRoom(roomDto1.getId());
+//        drawingService.createLoadingRoom(roomDto1.getId()); 게임룸 생성시 로딩룸 생성하도록 변경
 
         //게임룸 동시 입장
         CompletableFuture<Void> startUser1 = CompletableFuture.runAsync(() -> asyncTransaction.run(() -> {
@@ -119,6 +119,9 @@ public class DrawingServiceTest {
                 .isEqualTo(roomDto2.getCurMember().size());
         //todo Loading을 Playing으로 변경 필요.
         assertThat(loadingRooms[0].getType()).as("").isEqualTo(RoomStatus.LOADING);
+
+        // 테스트 동시 실행 시 unique 오류 발생(방을 없애지 않아 유저가 겹쳣다.)
+        drawingService.breakRoom(roomDto2.getId());
     }
 
     /**
@@ -154,7 +157,7 @@ public class DrawingServiceTest {
 
         //게임 시작
         drawingService.changeRoomStatus(roomDto1.getId(), "LOADING");
-        drawingService.createLoadingRoom(roomDto1.getId());
+//        drawingService.createLoadingRoom(roomDto1.getId()); 게임룸 생성시 생성하도록 변경되어 삭제
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         //게임룸 동시 입장
@@ -200,5 +203,8 @@ public class DrawingServiceTest {
                 .as("로딩이 완료된 인원수와 현재 참석자 수가 일치하는지 확인")
                 .isEqualTo(roomDto2.getCurMember().size());
         assertThat(loadingRooms[0].getType()).as("").isEqualTo(RoomStatus.LOADING);
+
+        // 테스트 동시 실행 시 unique 오류 발생(방을 없애지 않아 유저가 겹쳣다.)
+        drawingService.breakRoom(roomDto2.getId());
     }
 }
