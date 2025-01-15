@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,8 +34,11 @@ public class AnswerService {
 
     @Transactional
     public void addNewAnswer(String answer){
-        Answer newAnswer = new Answer(answer);
-        answerRepository.save(newAnswer);
+        Optional<Answer> opAnswer = answerRepository.findByAnswer(answer);
+        if(opAnswer.isEmpty()){
+            Answer newAnswer = new Answer(answer);
+            answerRepository.save(newAnswer);
+        }
         totalAnswersCount = null;
     }
 

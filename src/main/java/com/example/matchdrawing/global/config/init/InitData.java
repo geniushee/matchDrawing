@@ -20,7 +20,7 @@ public class InitData {
     public ApplicationRunner initAnswersOfAnimals(){
         return args -> {
             // 다수의 정답을 사전에 입력
-            if(answerService.getTotalAnswersCount() < 3){
+            if(answerService.getTotalAnswersCount() < 144){
                 createAnswersFromTxtFile("static/txt/basic_answers_animal.txt");
             }
         };

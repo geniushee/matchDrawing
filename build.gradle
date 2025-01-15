@@ -38,6 +38,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 
+	// sql sever
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11'
+	implementation 'com.microsoft.azure:msal4j:1.18.0'
+
 
 }
 

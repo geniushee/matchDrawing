@@ -351,11 +351,11 @@
             canvas.freeDrawingBrush.width = parseInt(pencilWidth.value, 10) || 1;
 
             // 그림이 그려질 때마다 데이터 생성 - 그림이 일정이상 그려지면 데이터의 크기가 Stomp에서 제한하는 크기 이상이 되어 연결이 끊김
-            canvas.on("path:created", function (o) {
-                console.log(o.path)
+            canvas.on("object:added", function (o) {
+                console.log(o.target)
 
                 // path를 데이터로 생성
-                const pathData = JSON.stringify(o.path);
+                const pathData = JSON.stringify(o.target.path);
                 console.log("path:created :: ", pathData);
                 if (isUnderDataLimit(pathData)) {
                     // 그리기 공유, StompJs 버전 변경으로 수정
@@ -364,11 +364,7 @@
                         body: JSON.stringify({ msg: pathData })
                     })
                 } else {
-                    canvas.discardActiveObject();
-                    let sel = new fabric.ActiveSelection([JSON.parse(pathData)], {
-                        canvas: canvas,
-                    });
-                    sel.removeAll();
+                    canvas.remove(o.target);
                     alert("조금 더 작게 그려주세요.");
                 }
 

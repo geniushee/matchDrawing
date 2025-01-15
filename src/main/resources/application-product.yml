@@ -1,13 +1,13 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/drawing_match
-    username:
-    password:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://new-sql-sever.database.windows.net:1433;database=basic;user=${secret.azure.serverAdmin}@new-sql-sever;password=${secret.azure.password};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+    username: ${secret.azure.username}
+    password: ${secret.azure.password}
   jpa:
     hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.SQLServerDialect
   threads:
     virtual:
       enabled: true
@@ -39,5 +39,6 @@ custom:
       domain: localhost
       frontUrl: "https://${custom.site.product.domain}:${server.port}"
       backUrl: "https://${custom.site.product.domain}:${server.port}"
+
 #  jwt:
 #    secretKey: ${custom.jwt.key}

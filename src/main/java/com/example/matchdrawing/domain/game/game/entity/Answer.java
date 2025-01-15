@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Answer extends BaseEntity {
-    @Column(unique = true)
+    @Column(unique = true, columnDefinition = "nvarchar(100)")
     private String answer;
     private Integer correctAnswerNumber;
     private Integer numberOfQuestionsAsked;
