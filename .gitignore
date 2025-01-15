@@ -46,3 +46,4 @@ ticket.py
 src/main/resources/application-secret.yml
 src/main/resources/static/txt/align.py
 src/main/resources/static/txt/animals.txt
+azureCMD.txt

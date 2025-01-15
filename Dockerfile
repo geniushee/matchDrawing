@@ -1,5 +1,5 @@
 # Build stage
-FROM mcr.microsoft.com/openjdk/jdk:21-mariner AS builder
+FROM ghcr.io/graalvm/graalvm-community:21 as builder
 # 파일이름 지정
 ENV JAR_FILE=drawingm.jar
 
@@ -22,7 +22,7 @@ COPY src src
 RUN ./gradlew build --no-daemon
 
 # Runtime stage
-FROM mcr.microsoft.com/openjdk/jdk:21-mariner
+FROM ghcr.io/graalvm/graalvm-community:21
 
 # 첫 번째 스테이지에서 빌드된 JAR 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
