@@ -1,0 +1,44 @@
+name: Trigger auto deployment for drawing-match
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/drawing-match-AutoDeployTrigger-c80c8e12-8d7a-459b-a052-f19de8fde439.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.DRAWINGMATCH_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: ca728ff1318bacr.azurecr.io
+          registryUsername: ${{ secrets.DRAWINGMATCH_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.DRAWINGMATCH_REGISTRY_PASSWORD }}
+          containerAppName: drawing-match
+          resourceGroup: subscription1
+          imageToBuild: ca728ff1318bacr.azurecr.io/drawing-match:${{ github.sha }}
+          
+            
+
+     
+
