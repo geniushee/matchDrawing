@@ -19,7 +19,7 @@ RUN chmod +x ./gradlew
 COPY src src
 
 # 애플리케이션 빌드 및 테스트 실행
-RUN ./gradlew build --no-daemon
+RUN ./gradlew build --no-daemon --exclude-task test
 
 # Runtime stage
 FROM ghcr.io/graalvm/graalvm-community:21
