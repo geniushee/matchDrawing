@@ -21,6 +21,12 @@ jobs:
       - name: Checkout to the branch
         uses: actions/checkout@v2
 
+      - name: application-secret.yml 생성
+        env:
+          ACTIONS_STEP_DEBUG: true
+          APPLICATION_SECRET: ${{secrets.APPLICATION_SECRET}}
+        run: echo "$APPLICATION_SECRET" >> src/main/resources/application-secret.yml
+
       - name: Azure Login
         uses: azure/login@v1
         with:
