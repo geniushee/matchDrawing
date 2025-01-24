@@ -7,8 +7,10 @@ on:
     branches: 
       [ main ]
     paths:
-    - '**'
-    - '.github/workflows/drawing-match-AutoDeployTrigger-c80c8e12-8d7a-459b-a052-f19de8fde439.yml'
+    - '.github/workflows/**'
+    - 'src/**'
+    - 'build.gradle'
+    - 'Dockerfile'
 
   # Allow manual trigger 
   workflow_dispatch:
