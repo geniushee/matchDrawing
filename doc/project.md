@@ -7,5 +7,10 @@
 - WS를 사용하여 텍스트 및 그림을 실시간으로 공유하는 어플을 개발
 - WS의 사용과 이해가 주목적
 
+## 사용한 주요 프레임워크 및 라이브러리
+- Spring Framework
+- FabricJS
+- Stomp
+
 ## [프로젝트 진행상황](progress.md)
 
