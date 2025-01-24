@@ -1,4 +1,4 @@
-package com.example.matchdrawing.global;
+package com.example.matchdrawing.global.request;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;

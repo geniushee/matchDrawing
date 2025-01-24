@@ -3,7 +3,7 @@ package com.example.matchdrawing.domain.game.game.contorller;
 import com.example.matchdrawing.domain.game.game.dto.CreateRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
-import com.example.matchdrawing.global.Rq;
+import com.example.matchdrawing.global.request.Rq;
 import com.example.matchdrawing.global.config.websocket.dto.CustomPrincipal;
 import com.example.matchdrawing.global.config.websocket.dto.DrawingDataMessageDto;
 import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;

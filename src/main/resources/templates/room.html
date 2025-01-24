@@ -43,6 +43,8 @@
     <script th:inline="javascript">
         const user = /*[[${@rq.getUsername()}]]*/ 'noUser';
         let roomDto = /*[[${ roomDto }]]*/ null;
+        const domain = /*[[${@domain}]]*/ 'localhost:8080';
+        const frontUrl = /*[[${@frontUrl}]]*/ `http://${domain}`; //서버사이드 렌더링이라 도메인 동일
 
         function getStatus() {
             return roomDto.status;
@@ -51,12 +53,12 @@
         const roomId = /*[[${ roomDto.id }]]*/ null;
 
         if (getStatus() === "PLAYING" || getStatus() === "LOADING") {
-            window.location.href = `http://localhost:8080/roby/game/${roomId}`;
+            window.location.href = `${frontUrl}/roby/game/${roomId}`;
         } else {
             setRoomInfo();
         }
 
-        const socket = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
+        const socket = new SockJS(`${frontUrl}/ws?roomId=` + `${roomId}`);
         // const stompClient = Stomp.over(socket);
         const stompClient = new StompJs.Client({
             webSocketFactory: () => socket,
@@ -75,7 +77,7 @@
                     // 방장이 나갔다는 메세지 출력
                     alert(jsonData.msg);
                     // alert가 종료되면 자동으로 리디렉션
-                    window.location.href = "http://localhost:8080/roby/list";
+                    window.location.href = `${frontUrl}/roby/list`;
                 }
 
                 // 게임 시작 트리거
@@ -126,7 +128,7 @@
         // plusMember();
 
         async function changeStatus(status) {
-            const url = "http://localhost:8080/api/game/changeStatus";
+            const url = `${frontUrl}/api/game/changeStatus`;
             const response = await fetch(url,
                 {
                     method: "POST",
@@ -186,7 +188,7 @@
 
         function exit() {
             event.preventDefault();
-            window.location.href = "http://localhost:8080/roby/list";
+            window.location.href = `${frontUrl}/roby/list`;
         }
 
         function setRoomInfo() {
@@ -213,7 +215,7 @@
         }
 
         async function requestRoomInfo() {
-            const url = "http://localhost:8080/api/game/roomInfo/" + roomId
+            const url = `${frontUrl}/api/game/roomInfo/` + roomId
             try {
                 const response = await fetch(url)
                 const data = response.json();

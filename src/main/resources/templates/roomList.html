@@ -18,6 +18,9 @@
         </section>
     </main>
     <script>
+        const domain = /*[[${@domain}]]*/ 'localhost:8080';
+        const frontUrl = /*[[${@frontUrl}]]*/ `http://${domain}`;
+        const isProduct =  /*[[${@isProduct}]]*/ false;
 
         getRoomList()
         refreshPage(5)
@@ -30,7 +33,7 @@
         }
 
         async function getRoomList() {
-            const url = "http://localhost:8080/api/game/list"
+            const url = `${frontUrl}/api/game/list`;
             let response = await fetch(url)
 
             console.log(response)

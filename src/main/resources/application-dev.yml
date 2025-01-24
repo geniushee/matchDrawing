@@ -24,11 +24,10 @@ spring:
 #    username: "${custom.rabbitmq.username}"
 #    password: "${custom.rabbitmq.password}"
 
-#custom:
-#  site:
-#    dev:
-#      domain: localhost
-#      frontUrl: "http://${custom.site.dev.domain}:5173"
-#      backUrl: "http://${custom.site.dev.domain}:${server.port}"
+custom:
+  site:
+    domain: localhost
+    frontUrl: "http://${custom.site.domain}:${server.port}"
+    backUrl: "http://${custom.site.domain}:${server.port}"
 #  jwt:
 #    secretKey: ${custom.jwt.key}

@@ -35,10 +35,9 @@ logging:
 
 custom:
   site:
-    product:
-      domain: localhost
-      frontUrl: "https://${custom.site.product.domain}:${server.port}"
-      backUrl: "https://${custom.site.product.domain}:${server.port}"
+    domain: drawing.genj.me
+    frontUrl: "https://${custom.site.domain}"
+    backUrl: "https://${custom.site.domain}"
 
 #  jwt:
 #    secretKey: ${custom.jwt.key}
