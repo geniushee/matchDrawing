@@ -100,6 +100,9 @@
         const username = /*[[${@rq.getUsername()}]]*/ 'noUser';
         const roomInfo = /*[[${ roomDto }]]*/ { id: null };
         const roomId = roomInfo.id;
+        const domain = /*[[${@domain}]]*/ 'localhost:8080';
+        const frontUrl = /*[[${@frontUrl}]]*/ `http://${domain}`;
+        const isProduct =  /*[[${@isProduct}]]*/ false;
 
         // 로딩 구현
         document.addEventListener("DOMContentLoaded", function () {
@@ -114,7 +117,7 @@
             var interval = setInterval(checkLoadingComplete, 1000)
 
             async function isLoading() {
-                const url = "http://localhost:8080/api/game/isLoading?roomId=" + roomId;
+                const url = `${frontUrl}/api/game/isLoading?roomId=` + roomId;
                 const response = await fetch(url);
 
                 if (!response.ok) {
@@ -127,7 +130,7 @@
             }
 
             async function enterGame() {
-                const url = "http://localhost:8080/api/game/enterGame";
+                const url = `${frontUrl}/api/game/enterGame`;
                 const response = await fetch(url, {
                     method: "POST",
                     headers: {
@@ -167,7 +170,7 @@
             }
 
             async function changeStatus(status) {
-            const url = "http://localhost:8080/api/game/changeStatus";
+            const url = `${frontUrl}/api/game/changeStatus`;
             const response = await fetch(url,
                 {
                     method: "POST",
@@ -206,7 +209,7 @@
 
         SockJS.prototype.debug = true;
         // websocket 및 stomp 연결부분
-        const socket_dr = new SockJS('http://localhost:8080/dr', {}, {});
+        const socket_dr = new SockJS(`${frontUrl}/dr`, {}, {});
 
         // stompJs 버전 변경
         // const stompClient_dr = Stomp.over(socket_dr);
@@ -253,7 +256,7 @@
         //     console.log('[STOMP dr_client Debug]:', msg)
         // }
 
-        const socket_msg = new SockJS('http://localhost:8080/ws?roomId=' + `${roomId}`);
+        const socket_msg = new SockJS(`${frontUrl}/ws?roomId=` + `${roomId}`);
         const stompClient_msg = new StompJs.Client({
             webSocketFactory: () => socket_msg,
             debug: function (str) {
@@ -271,7 +274,7 @@
                     // 방장이 나갔다는 메세지 출력
                     alert(jsonData.msg);
                     // alert가 종료되면 자동으로 리디렉션
-                    window.location.href = "http://localhost:8080/roby/list";
+                    window.location.href = `${frontUrl}/roby/list`;
                 }
 
                 if (!isOwner(jsonData.sender)) {
@@ -302,7 +305,7 @@
                                     console.log("방에서 안 나가졌다. 확인해보자.")
                                 }
                             });
-                            window.location.href = "http://localhost:8080/roby/list";
+                            window.location.href = `${frontUrl}/roby/list`;
                         }
                     }
                 }
@@ -479,7 +482,7 @@
         }
 
         async function countUpAnswer(id, type) {
-            const url = "http://localhost:8080/api/game/countUp";
+            const url = `${frontUrl}/api/game/countUp`;
             fetch(url, {
                 method: "POST",
                 headers: {
@@ -524,7 +527,7 @@
         }
 
         async function exitGame() {
-            const url = "http://localhost:8080/api/game/exitGame";
+            const url = `${frontUrl}/api/game/exitGame`;
             const response = await fetch(url, {
                 method: "POST",
                 headers: {

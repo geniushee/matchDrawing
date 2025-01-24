@@ -5,7 +5,7 @@ import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.entity.RoomStatus;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.domain.member.member.dto.MemberDto;
-import com.example.matchdrawing.global.Rq;
+import com.example.matchdrawing.global.request.Rq;
 import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

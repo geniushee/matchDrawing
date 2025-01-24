@@ -6,7 +6,7 @@ import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.LoadingRoomRequestDto;
 import com.example.matchdrawing.domain.game.game.service.AnswerService;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
-import com.example.matchdrawing.global.Rq;
+import com.example.matchdrawing.global.request.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
