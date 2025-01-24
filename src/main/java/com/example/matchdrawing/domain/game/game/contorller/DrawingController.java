@@ -8,6 +8,7 @@ import com.example.matchdrawing.global.config.websocket.dto.DrawingDataMessageDt
 import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
 import com.example.matchdrawing.global.request.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
@@ -24,7 +25,6 @@ public class DrawingController {
 
     private final DrawingService drawingService;
     private final Rq rq;
-    private final String frontUrl;
 
     @GetMapping("")
     public String showRoby(){
@@ -81,7 +81,8 @@ public class DrawingController {
     @MessageMapping("/room{id}")
     public void roomSendMsg(@DestinationVariable(value = "id")Long id,
                             SimpleMessageDto msgDto,
-                            CustomPrincipal user){
+                            CustomPrincipal user,
+                            @Qualifier("frontUrl")String frontUrl){
         if(drawingService.checkEventStartGame(msgDto)){
             msgDto.setMsg(frontUrl + "/roby/game/"+id);
             msgDto.setSender("start");

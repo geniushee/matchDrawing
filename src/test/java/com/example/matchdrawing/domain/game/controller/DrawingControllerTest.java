@@ -49,9 +49,6 @@ public class DrawingControllerTest {
     @MockBean
     private Rq rq;
 
-    @MockBean
-    private String frontUrl;
-
     private MockMvc mockMvc;
 
     private MockCookie cookie;
@@ -62,7 +59,7 @@ public class DrawingControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(new DrawingController(drawingService, rq, frontUrl)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new DrawingController(drawingService, rq)).build();
         cookie = new MockCookie("login", "user1");
         mvcResult = null;
     }
