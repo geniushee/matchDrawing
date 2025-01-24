@@ -3,10 +3,10 @@ package com.example.matchdrawing.domain.game.game.contorller;
 import com.example.matchdrawing.domain.game.game.dto.CreateRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
-import com.example.matchdrawing.global.request.Rq;
 import com.example.matchdrawing.global.config.websocket.dto.CustomPrincipal;
 import com.example.matchdrawing.global.config.websocket.dto.DrawingDataMessageDto;
 import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
+import com.example.matchdrawing.global.request.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,6 +24,7 @@ public class DrawingController {
 
     private final DrawingService drawingService;
     private final Rq rq;
+    private final String frontUrl;
 
     @GetMapping("")
     public String showRoby(){
@@ -61,7 +62,7 @@ public class DrawingController {
                             Model model){
         if(!rq.isLogin()){
             String msg = URLEncoder.encode("로그인이 필요합니다.", StandardCharsets.UTF_8);
-            return "redirect:/roby/signin?msg="+msg;
+            return "redirect:/member/signin?msg="+msg;
         }
 
         drawingService.enterWaitingRoom(roomId, rq.getMember());
@@ -82,7 +83,7 @@ public class DrawingController {
                             SimpleMessageDto msgDto,
                             CustomPrincipal user){
         if(drawingService.checkEventStartGame(msgDto)){
-            msgDto.setMsg("http://localhost:8080/roby/game/"+id);
+            msgDto.setMsg(frontUrl + "/roby/game/"+id);
             msgDto.setSender("start");
         }else{
             msgDto.setSender(user.getName());
