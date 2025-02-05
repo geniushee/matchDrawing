@@ -26,10 +26,10 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/roby/list}">목록보기</a>
                     </li>
-                    <li th:if="${!@rq.isLogin()}" class="nav-item">
+                    <li th:unless="${@rq.isLogin()}" class="nav-item">
                         <a class="nav-link" th:href="@{/member/signup}">회원가입</a>
                     </li>
-                    <li th:if="${!@rq.isLogin()}" class="nav-item">
+                    <li th:if="not ${@rq.isLogin()}" class="nav-item">
                         <a class="nav-link" th:href="@{/member/signin}">로그인</a>
                     </li>
                     <li th:if="${@rq.isLogin()}" class="nav-item">

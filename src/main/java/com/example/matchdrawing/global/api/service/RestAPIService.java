@@ -4,7 +4,7 @@ import com.example.matchdrawing.global.api.service.dto.KoreanDictItem;
 import com.example.matchdrawing.global.api.service.dto.StDictResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -15,11 +15,8 @@ import java.util.List;
 @Service
 public class RestAPIService {
 
-    public final String koreanDictKey;
-
-    public RestAPIService(@Qualifier("koreanDictKey") String koreanDictKey){
-        this.koreanDictKey = koreanDictKey;
-    }
+    @Value("${secret.KDictKey}")
+    public String koreanDictKey;
 
     /**
      * 표준대국어사전에서 단어(명사)를 검색할 수 있다.

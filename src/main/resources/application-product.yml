@@ -6,7 +6,7 @@ spring:
     password: ${secret.azure.password}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     database-platform: org.hibernate.dialect.SQLServerDialect
   threads:
     virtual:

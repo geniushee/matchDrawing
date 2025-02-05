@@ -3,14 +3,9 @@ package com.example.matchdrawing.domain.game.game.contorller;
 import com.example.matchdrawing.domain.game.game.dto.CreateRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
-import com.example.matchdrawing.global.config.websocket.dto.CustomPrincipal;
-import com.example.matchdrawing.global.config.websocket.dto.DrawingDataMessageDto;
 import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
 import com.example.matchdrawing.global.request.Rq;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -78,34 +73,14 @@ public class DrawingController {
         return "room";
     }
 
-    @MessageMapping("/room{id}")
-    public void roomSendMsg(@DestinationVariable(value = "id")Long id,
-                            SimpleMessageDto msgDto,
-                            CustomPrincipal user,
-                            @Qualifier("frontUrl")String frontUrl){
-        if(drawingService.checkEventStartGame(msgDto)){
-            msgDto.setMsg(frontUrl + "/roby/game/"+id);
-            msgDto.setSender("start");
-        }else{
-            msgDto.setSender(user.getName());
-        }
-        String destination = "/room" + id;
-        drawingService.sendMessage(destination, msgDto);
-    }
+
 
     @GetMapping("/test")
     public String showTestPage(){
         return "canvas";
     }
 
-    @MessageMapping("/drawing{id}")
-    public void drawingSendImg(@DestinationVariable(value = "id")Long id,
-                               DrawingDataMessageDto msgDto,
-                               CustomPrincipal user){
-        msgDto.setSender("시험");
-        String destination = "/drawing"+id;
-        drawingService.sendMessage(destination, msgDto);
-    }
+
 
     @GetMapping("/game/{id}")
     public String startGame(@PathVariable(name = "id")Long roomId,

@@ -29,6 +29,7 @@ public class DrawingRoom extends TimeEntity implements Room {
     @Builder.Default
     private List<Member> curMember = new ArrayList<>();
     @OneToMany
+    @Builder.Default
     private List<Answer> answers = new ArrayList<>();
 
     public boolean isMax(){

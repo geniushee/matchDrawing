@@ -18,8 +18,6 @@
         </section>
     </main>
     <script th:inline="javascript">
-        const domain = /*[[${@domain}]]*/ 'localhost:8080';
-        const frontUrl = /*[[${@frontUrl}]]*/ `http://${domain}`;
         const isProduct =  /*[[${@isProduct}]]*/ false;
 
         getRoomList()
@@ -33,7 +31,7 @@
         }
 
         async function getRoomList() {
-            const url = `${frontUrl}/api/game/list`;
+            const url = `/api/game/list`;
             let response = await fetch(url)
 
             console.log(response)
