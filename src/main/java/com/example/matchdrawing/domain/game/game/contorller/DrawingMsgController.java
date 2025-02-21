@@ -37,7 +37,7 @@ public class DrawingMsgController {
     public void drawingSendImg(@DestinationVariable(value = "id")Long id,
                                DrawingDataMessageDto msgDto,
                                CustomPrincipal user){
-        msgDto.setSender(rq.getUsername());
+        msgDto.setSender(user.getName());
         String destination = "/drawing"+id;
         drawingService.sendMessage(destination, msgDto);
     }
