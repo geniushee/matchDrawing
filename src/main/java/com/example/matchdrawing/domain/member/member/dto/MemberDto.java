@@ -2,14 +2,16 @@ package com.example.matchdrawing.domain.member.member.dto;
 
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @AllArgsConstructor
 public class MemberDto {
     private String username;
 
+    public MemberDto(){}
     public MemberDto(Member member){
         username = member.getUsername();
     }
+
 }

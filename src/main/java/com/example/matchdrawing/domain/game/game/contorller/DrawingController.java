@@ -3,7 +3,7 @@ package com.example.matchdrawing.domain.game.game.contorller;
 import com.example.matchdrawing.domain.game.game.dto.CreateRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
-import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
+import com.example.matchdrawing.global.config.websocket.message.MessageType;
 import com.example.matchdrawing.global.request.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -60,15 +60,15 @@ public class DrawingController {
             return "redirect:/member/signin?msg="+msg;
         }
 
+        // 방 입장 처리
         drawingService.enterWaitingRoom(roomId, rq.getMember());
         DrawingRoomDto roomDto = drawingService.findRoomDtoById(roomId);
         model.addAttribute("roomDto", roomDto);
 
+        //입장 메시지 전송
         String destination = "/room" + roomId;
-        SimpleMessageDto msgDto = new SimpleMessageDto();
-        msgDto.setSender("system");
-        msgDto.setMsg(String.format("%s가 참가했습니다.", rq.getUsername()));
-        drawingService.sendMessage(destination, msgDto);
+        drawingService.sendMessage(destination, MessageType.TEXT, String.format("%s가 참가했습니다.", rq.getUsername()),
+                rq.getUsername(), null);
 
         return "room";
     }

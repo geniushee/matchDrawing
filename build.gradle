@@ -42,6 +42,9 @@ dependencies {
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11'
 	implementation 'com.microsoft.azure:msal4j:1.18.0'
 
+	// for parsing LocalDateTime
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
+
 
 }
 

@@ -1,6 +1,6 @@
 package com.example.matchdrawing.domain.game;
 
-import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
+import com.example.matchdrawing.domain.game.game.dto.MessageDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,9 +68,7 @@ public class WebSocketTest {
         /* msg를 단순한 String으로 받지않고 객체로 받는다.
         따라서, payload를 json으로 보내기 때문에 테스트 역시 json으로 변환하여 보내서 테스트를 진행한다.
          */
-        SimpleMessageDto dto = new SimpleMessageDto();
-        dto.setMsg("hi");
-        dto.setSender("시험");
+        MessageDto dto = new MessageDto("TEXT", "hi", "시험", null);
 
         session.send("/app/drawing1", objectMapper.writeValueAsString(dto).getBytes());
 
@@ -94,9 +92,7 @@ public class WebSocketTest {
                 .get(1, TimeUnit.SECONDS);
         session.subscribe(WEBSOCKET_BROKER+"/room"+roomId, new DefaultStompFrameHandler());
 
-        SimpleMessageDto dto = new SimpleMessageDto();
-        dto.setMsg("hi");
-        dto.setSender(username);
+        MessageDto dto = new MessageDto("TEXT", "hi", username, null);
 
         session.send("/app/room"+roomId, objectMapper.writeValueAsString(dto).getBytes());
 

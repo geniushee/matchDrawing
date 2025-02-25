@@ -1,12 +1,12 @@
 package com.example.matchdrawing.domain.game.controller;
 
 import com.example.matchdrawing.domain.game.game.contorller.DrawingController;
+import com.example.matchdrawing.domain.game.game.dto.CustomPageDto;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.entity.RoomStatus;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.domain.member.member.dto.MemberDto;
 import com.example.matchdrawing.global.request.Rq;
-import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -85,17 +84,10 @@ public class DrawingControllerTest {
                 new ArrayList<>());
     }
 
-    private SimpleMessageDto createMSGDto(String msg, String sender) {
-        SimpleMessageDto dto = new SimpleMessageDto();
-        dto.setMsg(msg);
-        dto.setSender(sender);
-        return dto;
-    }
-
     @Test
     void showRoomListTest() throws Exception {
-        Page<DrawingRoomDto> page = new PageImpl<>(
-                List.of(createRoomDto("roomName",2)));
+        CustomPageDto<DrawingRoomDto> page = new CustomPageDto<>(new PageImpl<>(
+                List.of(createRoomDto("roomName", 2))));
         when(this.drawingService.getRoomList(PageRequest.of(0, 5, Sort.by("createTime").descending()))).thenReturn(page);
 
         mockMvc.perform(get("/roby/list"))
@@ -150,11 +142,11 @@ public class DrawingControllerTest {
         when(drawingService.findRoomDtoById(roomId)).thenReturn(roomDto);
 
         MvcResult result = mockMvc.perform(get("/roby/room/{roomId}", roomId)
-                                .cookie(cookie))
-                        .andExpect(status().isOk())
-                        .andExpect(view().name("room"))
-                        .andExpect(model().attribute("roomDto", roomDto))
-                        .andReturn();
+                        .cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(view().name("room"))
+                .andExpect(model().attribute("roomDto", roomDto))
+                .andReturn();
         mvcResult = result.getResponse().getContentAsString();
         /*
         webMvcTest에서는 렌더링이 되지 않기 때문에 html을 직접 확인하기는 어렵다고 한다.

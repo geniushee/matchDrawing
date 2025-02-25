@@ -1,14 +1,10 @@
 package com.example.matchdrawing.domain.game.game.contorller;
 
-import com.example.matchdrawing.domain.game.game.dto.ChangeRoomDto;
-import com.example.matchdrawing.domain.game.game.dto.CountType;
-import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
-import com.example.matchdrawing.domain.game.game.dto.LoadingRoomRequestDto;
+import com.example.matchdrawing.domain.game.game.dto.*;
 import com.example.matchdrawing.domain.game.game.service.AnswerService;
 import com.example.matchdrawing.domain.game.game.service.DrawingService;
 import com.example.matchdrawing.global.request.Rq;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -35,11 +31,11 @@ public class DrawingAPIController {
         orders.add(Sort.Order.desc("createTime"));
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(orders));
 
-        Page<DrawingRoomDto> list = drawingService.getRoomList(pageable);
-        if (list.isEmpty()) {
-            return null;
+        CustomPageDto<DrawingRoomDto> customPageDto = drawingService.getRoomList(pageable);
+        if (customPageDto.isEmpty()) {
+            return ResponseEntity.ok(null);
         }
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(customPageDto);
     }
 
     @GetMapping("/roomInfo/{id}")

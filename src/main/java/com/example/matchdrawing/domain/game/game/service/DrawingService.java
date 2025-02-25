@@ -1,5 +1,6 @@
 package com.example.matchdrawing.domain.game.game.service;
 
+import com.example.matchdrawing.domain.game.game.dto.CustomPageDto;
 import com.example.matchdrawing.domain.game.game.dto.DrawingRoomDto;
 import com.example.matchdrawing.domain.game.game.dto.LoadingRoomDto;
 import com.example.matchdrawing.domain.game.game.entity.Answer;
@@ -10,12 +11,13 @@ import com.example.matchdrawing.domain.game.game.repository.DrawingRoomRepositor
 import com.example.matchdrawing.domain.game.game.repository.LoadingRoomRepository;
 import com.example.matchdrawing.domain.member.member.entity.Member;
 import com.example.matchdrawing.domain.member.member.service.MemberService;
-import com.example.matchdrawing.global.config.websocket.dto.MessageDto;
-import com.example.matchdrawing.global.config.websocket.dto.SimpleMessageDto;
-import com.example.matchdrawing.global.config.websocket.dto.StompTemplate;
+import com.example.matchdrawing.global.config.websocket.message.Message;
+import com.example.matchdrawing.global.config.websocket.message.MessageFactory;
+import com.example.matchdrawing.global.config.websocket.message.MessageType;
+import com.example.matchdrawing.global.config.websocket.messageHandler.MessageHandler;
+import com.example.matchdrawing.global.config.websocket.messageHandler.MessageHandlerResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +35,8 @@ public class DrawingService {
 
     private final DrawingRoomRepository drawingRoomRepository;
     private final LoadingRoomRepository loadingRoomRepository;
-    private final StompTemplate template;
+    private final MessageHandlerResolver handlerResolver;
+    private final MessageFactory messageFactory;
     private final MemberService memberService;
     private final AnswerService answerService;
 
@@ -57,25 +60,9 @@ public class DrawingService {
         return new DrawingRoomDto(room);
     }
 
-    public Page<DrawingRoomDto> getRoomList(Pageable pageable) {
-
+    public CustomPageDto<DrawingRoomDto> getRoomList(Pageable pageable) {
         Page<DrawingRoom> data = drawingRoomRepository.findAll(pageable);
-        List<DrawingRoomDto> dtos = data.stream().map(DrawingRoomDto::new).toList();
-        return new PageImpl<>(dtos, pageable, data.getTotalElements());
-    }
-
-
-    public void sendMessage(String destination, MessageDto msgDto) {
-        template.convertAndSend(destination, msgDto);
-    }
-
-
-    public boolean checkEventStartGame(SimpleMessageDto msgDto) {
-        if(msgDto.getMsg().contains("Event:/")){
-            String msg = msgDto.getMsg().replace("Event:/","");
-            return msg.equals("startGame");
-        }
-        return false;
+        return new CustomPageDto<>(data.map(DrawingRoomDto::new));
     }
 
     public DrawingRoomDto findRoomDtoById(Long roomId) {
@@ -194,5 +181,11 @@ public class DrawingService {
     public LoadingRoomDto findLoadingRoomDtoByRoomId(Long roomId){
         Optional<LoadingRoom> opLr = loadingRoomRepository.findByRoomId(roomId);
         return opLr.map(LoadingRoomDto::new).orElse(null);
+    }
+
+    public void sendMessage(String destination, MessageType type, String content, String sender, String eventType) {
+        Message message = messageFactory.createMessage(type, content, sender ,eventType);
+        MessageHandler handler = handlerResolver.getHandler(type);
+        handler.handle(destination, message);
     }
 }
