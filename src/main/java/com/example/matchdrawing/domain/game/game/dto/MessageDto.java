@@ -13,6 +13,8 @@ public class MessageDto implements Message {
     String sender;
     String EventType;
 
+    public MessageDto(){}
+
     public MessageDto(String type, String content, String sender, String eventType){
         this.type = type;
         this.content = content;

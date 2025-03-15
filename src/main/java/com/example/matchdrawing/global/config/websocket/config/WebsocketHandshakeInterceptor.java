@@ -64,7 +64,8 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
                     .orElse(null);
 
             if (loginCookie != null) {
-                attributes.put("user", loginCookie.getValue());
+                member = memberService.findByUsername(loginCookie.getValue()).orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                attributes.put("user", member);
             }else{
                 throw new RuntimeException("로그인이 필요합니다.");
             }

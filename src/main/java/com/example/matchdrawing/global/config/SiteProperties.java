@@ -11,7 +11,6 @@ public class SiteProperties {
     private final String backUrl;
 
     public SiteProperties(String domain, String frontUrl, String backUrl){
-        System.out.println(domain + frontUrl+backUrl);
         this.domain = domain;
         this.frontUrl = frontUrl;
         this.backUrl = backUrl;
