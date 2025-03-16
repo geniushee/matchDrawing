@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,7 @@ class AsyncTransaction {
  */
 @Slf4j
 @SpringBootTest
+@ActiveProfiles("test")
 public class DrawingServiceTest {
     @Autowired
     private DrawingService drawingService;

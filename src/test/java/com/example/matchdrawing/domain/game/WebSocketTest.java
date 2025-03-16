@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 따라서, SpringBootTest로 전체 Configuration을 다 가져와서 테스트를 진행해야한다.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"test", "websocket"})
+@ActiveProfiles("test")
 public class WebSocketTest {
     /**
      * @LocalServerPort 를 이용하여 테스트 시 포트 정보를 가져옴
